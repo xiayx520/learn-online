@@ -12,6 +12,7 @@
     <modules>
         <module>learn-online-base</module>
         <module>learn-online-content</module>
+        <module>learn-online-generator</module>
     </modules>
 
     <properties>

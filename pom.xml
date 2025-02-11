@@ -11,6 +11,7 @@
 
     <modules>
         <module>learn-online-base</module>
+        <module>learn-online-content</module>
     </modules>
 
     <properties>

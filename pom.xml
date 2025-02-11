@@ -7,6 +7,7 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>learn-online</name>
     <description>learn-online</description>
+    <packaging>pom</packaging>
 
     <properties>
         <java.version>1.8</java.version>

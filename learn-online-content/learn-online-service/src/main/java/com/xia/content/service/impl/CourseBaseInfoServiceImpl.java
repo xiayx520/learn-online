@@ -66,33 +66,33 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
     @Override
     public CourseBaseInfoVO createCourseBase(AddCourseDto addCourseDto) {
         //合法性校验
-        if (StringUtils.isBlank(addCourseDto.getName())) {
-            throw new GlobalException("课程名称为空");
-        }
-
-        if (StringUtils.isBlank(addCourseDto.getMt())) {
-            throw new GlobalException("课程分类为空");
-        }
-
-        if (StringUtils.isBlank(addCourseDto.getSt())) {
-            throw new GlobalException("课程分类为空");
-        }
-
-        if (StringUtils.isBlank(addCourseDto.getGrade())) {
-            throw new GlobalException("课程等级为空");
-        }
-
-        if (StringUtils.isBlank(addCourseDto.getTeachmode())) {
-            throw new GlobalException("教育模式为空");
-        }
-
-        if (StringUtils.isBlank(addCourseDto.getUsers())) {
-            throw new GlobalException("适应人群为空");
-        }
-
-        if (StringUtils.isBlank(addCourseDto.getCharge())) {
-            throw new GlobalException("收费规则为空");
-        }
+//        if (StringUtils.isBlank(addCourseDto.getName())) {
+//            throw new GlobalException("课程名称为空");
+//        }
+//
+//        if (StringUtils.isBlank(addCourseDto.getMt())) {
+//            throw new GlobalException("课程分类为空");
+//        }
+//
+//        if (StringUtils.isBlank(addCourseDto.getSt())) {
+//            throw new GlobalException("课程分类为空");
+//        }
+//
+//        if (StringUtils.isBlank(addCourseDto.getGrade())) {
+//            throw new GlobalException("课程等级为空");
+//        }
+//
+//        if (StringUtils.isBlank(addCourseDto.getTeachmode())) {
+//            throw new GlobalException("教育模式为空");
+//        }
+//
+//        if (StringUtils.isBlank(addCourseDto.getUsers())) {
+//            throw new GlobalException("适应人群为空");
+//        }
+//
+//        if (StringUtils.isBlank(addCourseDto.getCharge())) {
+//            throw new GlobalException("收费规则为空");
+//        }
         //封装程基本信息数据
         CourseBase courseBaseNew = new CourseBase();
         //拷贝添加课程基本信息

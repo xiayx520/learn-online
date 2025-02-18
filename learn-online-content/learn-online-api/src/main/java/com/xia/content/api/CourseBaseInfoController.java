@@ -2,8 +2,10 @@ package com.xia.content.api;
 
 import com.xia.base.model.PageParams;
 import com.xia.base.model.PageResult;
+import com.xia.content.model.dto.AddCourseDto;
 import com.xia.content.model.dto.QueryCourseParamsDto;
 import com.xia.content.model.po.CourseBase;
+import com.xia.content.model.vo.CourseBaseInfoVO;
 import com.xia.content.service.CourseBaseInfoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -33,6 +35,20 @@ public class CourseBaseInfoController {
     {
         log.info("查询课程列表，参数：{}",queryCourseParamsDto);
         return courseBaseInfoService.queryCourseBaseList(pageParams,queryCourseParamsDto);
+    }
+
+
+    /**
+     * 新增课程基本信息
+     * @param addCourseDto 新增课程基本信息
+     * @return 新增课程基本信息
+     */
+    @ApiOperation("新增课程基本信息")
+    @PostMapping("/course")
+    public CourseBaseInfoVO createCourseBase(@RequestBody AddCourseDto addCourseDto)
+    {
+        log.info("新增课程，参数：{}",addCourseDto);
+        return courseBaseInfoService.createCourseBase(addCourseDto);
     }
 
 }

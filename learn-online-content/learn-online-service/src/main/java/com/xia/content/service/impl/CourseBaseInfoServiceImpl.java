@@ -2,6 +2,7 @@ package com.xia.content.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.xia.base.exception.GlobalException;
 import com.xia.base.model.PageParams;
 import com.xia.base.model.PageResult;
 import com.xia.content.mapper.CourseBaseMapper;
@@ -66,31 +67,31 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
     public CourseBaseInfoVO createCourseBase(AddCourseDto addCourseDto) {
         //合法性校验
         if (StringUtils.isBlank(addCourseDto.getName())) {
-            throw new RuntimeException("课程名称为空");
+            throw new GlobalException("课程名称为空");
         }
 
         if (StringUtils.isBlank(addCourseDto.getMt())) {
-            throw new RuntimeException("课程分类为空");
+            throw new GlobalException("课程分类为空");
         }
 
         if (StringUtils.isBlank(addCourseDto.getSt())) {
-            throw new RuntimeException("课程分类为空");
+            throw new GlobalException("课程分类为空");
         }
 
         if (StringUtils.isBlank(addCourseDto.getGrade())) {
-            throw new RuntimeException("课程等级为空");
+            throw new GlobalException("课程等级为空");
         }
 
         if (StringUtils.isBlank(addCourseDto.getTeachmode())) {
-            throw new RuntimeException("教育模式为空");
+            throw new GlobalException("教育模式为空");
         }
 
         if (StringUtils.isBlank(addCourseDto.getUsers())) {
-            throw new RuntimeException("适应人群为空");
+            throw new GlobalException("适应人群为空");
         }
 
         if (StringUtils.isBlank(addCourseDto.getCharge())) {
-            throw new RuntimeException("收费规则为空");
+            throw new GlobalException("收费规则为空");
         }
         //封装程基本信息数据
         CourseBase courseBaseNew = new CourseBase();
@@ -107,7 +108,7 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
         courseBaseNew.setCreateDate(LocalDateTime.now());
         int insertCourseBase = courseBaseMapper.insert(courseBaseNew);
         if(insertCourseBase < 0){
-            throw new RuntimeException("添加课程基本信息失败");
+            throw new GlobalException("添加课程基本信息失败");
         }
 
         //封装程营销信息
@@ -118,7 +119,7 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
         //收费规则
         String charge = courseMarketNew.getCharge();
         if(StringUtils.isBlank(charge)){
-            throw new RuntimeException("收费规则没有选择");
+            throw new GlobalException("收费规则没有选择");
         }
         //收费规则为收费
         if(charge.equals("201001")){
@@ -126,7 +127,7 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
                     || courseMarketNew.getPrice().floatValue()<=0
                     || courseMarketNew.getOriginalPrice() == null
                     || courseMarketNew.getOriginalPrice().floatValue()<=0){
-                throw new RuntimeException("课程为收费价格不能为空且必须大于0");
+                throw new GlobalException("课程为收费价格不能为空且必须大于0");
             }
         }
         //根据id从课程营销表查询
@@ -134,13 +135,13 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
         if(courseMarketDB == null){
             int insertCourseMarket = courseMarketMapper.insert(courseMarketNew);
             if(insertCourseMarket < 0){
-                throw new RuntimeException("添加课程营销信息失败");
+                throw new GlobalException("添加课程营销信息失败");
             }
         }else{
             BeanUtils.copyProperties(courseMarketNew,courseMarketDB);
             int insertCourseMarket = courseMarketMapper.updateById(courseMarketDB);
             if(insertCourseMarket < 0){
-                throw new RuntimeException("更新课程营销信息失败");
+                throw new GlobalException("更新课程营销信息失败");
             }
         }
 

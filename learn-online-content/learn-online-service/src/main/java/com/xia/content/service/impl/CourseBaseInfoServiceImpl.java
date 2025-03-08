@@ -9,6 +9,7 @@ import com.xia.content.mapper.CourseBaseMapper;
 import com.xia.content.mapper.CourseCategoryMapper;
 import com.xia.content.mapper.CourseMarketMapper;
 import com.xia.content.model.dto.AddCourseDto;
+import com.xia.content.model.dto.EditCourseDto;
 import com.xia.content.model.dto.QueryCourseParamsDto;
 import com.xia.content.model.po.CourseBase;
 import com.xia.content.model.po.CourseCategory;
@@ -115,7 +116,13 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
         CourseMarket courseMarketNew = new CourseMarket();
         BeanUtils.copyProperties(addCourseDto,courseMarketNew);
         courseMarketNew.setId(courseBaseNew.getId());
+        //保存营销信息
+        saveCourseMarket(courseMarketNew);
 
+        return getCourseBaseInfo(courseBaseNew.getId());
+    }
+
+    public void saveCourseMarket(CourseMarket courseMarketNew) {
         //收费规则
         String charge = courseMarketNew.getCharge();
         if(StringUtils.isBlank(charge)){
@@ -144,9 +151,6 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
                 throw new GlobalException("更新课程营销信息失败");
             }
         }
-
-
-        return getCourseBaseInfo(courseBaseNew.getId());
     }
 
     //根据课程id查询课程基本信息，包括基本信息和营销信息
@@ -171,5 +175,40 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
 
         return courseBaseInfoVO;
 
+    }
+
+    /**
+     * 修改课程基本信息
+     * @param companyId
+     * @param editCourseDto
+     * @return
+     */
+    @Override
+    @Transactional
+    public CourseBaseInfoVO updateCourseBase(Long companyId, EditCourseDto editCourseDto) {
+        //课程id
+        Long courseId = editCourseDto.getId();
+        //查询课程是否存在
+        CourseBase courseBase = courseBaseMapper.selectById(courseId);
+        if(courseBase == null){
+            throw new GlobalException("课程不存在");
+        }
+        //判断本机构是否拥有该课程
+        if(!companyId.equals(courseBase.getCompanyId())){
+            throw new GlobalException("本机构没有该课程的权限");
+        }
+        //封装课程基本信息
+        CourseBase courseBaseNew = new CourseBase();
+        BeanUtils.copyProperties(editCourseDto,courseBaseNew);
+        courseBaseNew.setChangeDate(LocalDateTime.now());
+        int update = courseBaseMapper.updateById(courseBaseNew);
+
+        //封装课程营销信息
+        CourseMarket courseMarketNew = new CourseMarket();
+        BeanUtils.copyProperties(editCourseDto,courseMarketNew);
+        courseMarketNew.setId(courseId);
+        saveCourseMarket(courseMarketNew);
+
+        return getCourseBaseInfo(courseId);
     }
 }

@@ -3,6 +3,7 @@ package com.xia.content.service;
 import com.xia.base.model.PageParams;
 import com.xia.base.model.PageResult;
 import com.xia.content.model.dto.AddCourseDto;
+import com.xia.content.model.dto.EditCourseDto;
 import com.xia.content.model.dto.QueryCourseParamsDto;
 import com.xia.content.model.po.CourseBase;
 import com.xia.content.model.vo.CourseBaseInfoVO;
@@ -22,4 +23,19 @@ public interface CourseBaseInfoService {
      * @return
      */
     CourseBaseInfoVO createCourseBase(AddCourseDto addCourseDto);
+
+    /**
+     * 根据课程id查询课程基本信息
+     * @param courseId
+     * @return
+     */
+    CourseBaseInfoVO getCourseBaseInfo(Long courseId);
+
+    /**
+     * 修改课程基本信息
+     * @param companyId
+     * @param editCourseDto
+     * @return
+     */
+    CourseBaseInfoVO updateCourseBase(Long companyId, EditCourseDto editCourseDto);
 }

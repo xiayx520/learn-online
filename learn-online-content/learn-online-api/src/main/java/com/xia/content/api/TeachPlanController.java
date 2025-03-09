@@ -1,15 +1,14 @@
 package com.xia.content.api;
 
 
+import com.xia.content.model.dto.SaveTeachplanDto;
 import com.xia.content.model.vo.TeachPlanVO;
 import com.xia.content.service.TeachPlanService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -31,6 +30,16 @@ public class TeachPlanController {
     @ApiOperation("获取课程计划树形结构")
     public List<TeachPlanVO> getTeachPlanTree(@PathVariable Long courseId) {
         return teachPlanService.getTeachPlanTree(courseId);
+    }
+
+    /**
+     * 保存课程计划
+     * @param saveTeachplanDto
+     */
+    @PostMapping("/teachplan")
+    @ApiOperation("保存课程计划")
+    public void saveTeachPlan(@RequestBody SaveTeachplanDto saveTeachplanDto) {
+        teachPlanService.saveTeachPlan(saveTeachplanDto);
     }
 }
 

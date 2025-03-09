@@ -1,5 +1,6 @@
 package com.xia.content.service;
 
+import com.xia.content.model.dto.SaveTeachplanDto;
 import com.xia.content.model.vo.TeachPlanVO;
 
 import java.util.List;
@@ -12,4 +13,10 @@ public interface TeachPlanService {
      * @return 课程计划
      */
     List<TeachPlanVO> getTeachPlanTree(Long courseId);
+
+    /**
+     * 保存课程计划
+     * @param saveTeachplanDto
+     */
+    void saveTeachPlan(SaveTeachplanDto saveTeachplanDto);
 }

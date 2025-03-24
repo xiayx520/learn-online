@@ -41,5 +41,17 @@ public class TeachPlanController {
     public void saveTeachPlan(@RequestBody SaveTeachplanDto saveTeachplanDto) {
         teachPlanService.saveTeachPlan(saveTeachplanDto);
     }
+
+
+    /**
+     * 删除课程计划
+     * @param id 课程计划id
+     */
+    @ApiOperation("删除课程计划")
+    @DeleteMapping("/teachplan/{id}")
+    public void deleteTeachPlan(@PathVariable Long id) {
+        teachPlanService.deleteTeachPlan(id);
+    }
+    
 }
 

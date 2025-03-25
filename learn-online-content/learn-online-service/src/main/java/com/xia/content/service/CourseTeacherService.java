@@ -12,4 +12,12 @@ public interface CourseTeacherService {
      * @return
      */
     List<CourseTeacher> getCourseTeacher(Long id);
+
+    /**
+     * 添加或修改课程教师信息
+     * @param courseTeacher
+     * @param companyId
+     * @return
+     */
+    CourseTeacher addOrUpdateCourseTeacher(CourseTeacher courseTeacher, Long companyId);
 }

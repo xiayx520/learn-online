@@ -6,9 +6,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -32,5 +30,19 @@ public class CourseTeacherController {
     public List<CourseTeacher> getCourseTeacher(@PathVariable Long id) {
         log.info("根据课程id查询课程教师信息，参数：{}", id);
         return courseTeacherService.getCourseTeacher(id);
+    }
+
+    /**
+     * 添加或修改课程教师信息
+     * @param courseTeacher
+     * @return
+     */
+    @PostMapping("/courseTeacher")
+    @ApiOperation("添加或修改课程教师信息")
+    public CourseTeacher addOrUpdateCourseTeacher(@RequestBody CourseTeacher courseTeacher) {
+        log.info("添加或修改课程教师信息，参数：{}", courseTeacher);
+        //TODO 机构id
+        Long companyId = 1232141425L;
+        return courseTeacherService.addOrUpdateCourseTeacher(courseTeacher, companyId);
     }
 }

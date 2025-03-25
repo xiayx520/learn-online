@@ -52,6 +52,17 @@ public class TeachPlanController {
     public void deleteTeachPlan(@PathVariable Long id) {
         teachPlanService.deleteTeachPlan(id);
     }
-    
+
+    /**
+     * 移动课程计划
+     * @param moveType
+     * @param id
+     */
+    @ApiOperation("移动课程计划")
+    @PostMapping("/teachplan/{moveType}/{id}")
+    public void moveTeachPlan(@PathVariable String moveType, @PathVariable Long id) {
+        teachPlanService.moveTeachPlan(moveType, id);
+    }
+
 }
 

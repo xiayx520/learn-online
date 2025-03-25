@@ -25,4 +25,12 @@ public interface TeachPlanService {
      * @param id
      */
     void deleteTeachPlan(Long id);
+
+
+    /**
+     * 移动课程计划
+     * @param moveType
+     * @param id
+     */
+    void moveTeachPlan(String moveType, Long id);
 }

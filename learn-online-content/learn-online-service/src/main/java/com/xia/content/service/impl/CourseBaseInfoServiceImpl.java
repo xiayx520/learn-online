@@ -1,19 +1,16 @@
 package com.xia.content.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xia.base.exception.GlobalException;
 import com.xia.base.model.PageParams;
 import com.xia.base.model.PageResult;
-import com.xia.content.mapper.CourseBaseMapper;
-import com.xia.content.mapper.CourseCategoryMapper;
-import com.xia.content.mapper.CourseMarketMapper;
+import com.xia.content.mapper.*;
 import com.xia.content.model.dto.AddCourseDto;
 import com.xia.content.model.dto.EditCourseDto;
 import com.xia.content.model.dto.QueryCourseParamsDto;
-import com.xia.content.model.po.CourseBase;
-import com.xia.content.model.po.CourseCategory;
-import com.xia.content.model.po.CourseMarket;
+import com.xia.content.model.po.*;
 import com.xia.content.model.vo.CourseBaseInfoVO;
 import com.xia.content.service.CourseBaseInfoService;
 import org.apache.commons.lang3.StringUtils;
@@ -35,6 +32,15 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
 
     @Autowired
     private CourseCategoryMapper courseCategoryMapper;
+
+    @Autowired
+    private CourseTeacherMapper courseTeacherMapper;
+
+    @Autowired
+    private TeachplanMapper teachPlanMapper;
+
+    @Autowired
+    private TeachplanMediaMapper teachplanMediaMapper;
 
     /**
      * 根据查询条件分页查询课程
@@ -210,5 +216,61 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
         saveCourseMarket(courseMarketNew);
 
         return getCourseBaseInfo(courseId);
+    }
+
+    /**
+     * 删除课程基本信息
+     * @param courseId
+     * @param companyId
+     */
+    @Override
+    @Transactional
+    public void deleteCourseBase(Long courseId, Long companyId) {
+        CourseBase courseBase = courseBaseMapper.selectById(courseId);
+        if(courseBase == null){
+            throw new GlobalException("课程不存在");
+        }
+        if(!companyId.equals(courseBase.getCompanyId())){
+            throw new GlobalException("本机构没有该课程的权限");
+        }
+        //课程的审核状态为未提交时方可删除
+        if(!courseBase.getAuditStatus().equals("202002")){
+            throw new GlobalException("课程的审核状态为未提交时方可删除");
+        }
+        //删除课程基本信息
+        int deleteCourseBase = courseBaseMapper.deleteById(courseId);
+        if(deleteCourseBase < 0){
+            throw new GlobalException("删除课程基本信息失败");
+        }
+        //删除课程营销信息
+        int deleteCourseMarket = courseMarketMapper.deleteById(courseId);
+        if(deleteCourseMarket < 0){
+            throw new GlobalException("删除课程营销信息失败");
+        }
+        //删除课程计划信息
+        int deleteTeachPlan = teachPlanMapper.delete(
+                new LambdaQueryWrapper<Teachplan>()
+                        .eq(Teachplan::getCourseId, courseId)
+        );
+        if(deleteTeachPlan < 0){
+            throw new GlobalException("删除课程计划信息失败");
+        }
+        //删除课程媒资信息
+        int deleteCoursePublish = teachplanMediaMapper.delete(
+                new LambdaQueryWrapper<TeachplanMedia>()
+                        .eq(TeachplanMedia::getCourseId, courseId)
+        );
+        if(deleteCoursePublish < 0){
+            throw new GlobalException("删除课程媒资信息失败");
+        }
+        //删除课程教师信息
+        int deleteCourseTeacher = courseTeacherMapper.delete(
+                new LambdaQueryWrapper<CourseTeacher>()
+                        .eq(CourseTeacher::getCourseId, courseId)
+        );
+
+        if(deleteCourseTeacher < 0){
+            throw new GlobalException("删除课程教师信息失败");
+        }
     }
 }

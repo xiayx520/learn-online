@@ -79,4 +79,18 @@ public class CourseBaseInfoController {
         return courseBaseInfoService.updateCourseBase(companyId, editCourseDto);
     }
 
+
+    /**
+     * 删除课程基本信息
+     * @param courseId
+     */
+    @ApiOperation("删除课程基本信息")
+    @DeleteMapping("/course/{courseId}")
+    public void deleteCourseBase(@PathVariable Long courseId)
+    {
+        log.info("删除课程，参数：{}",courseId);
+        //TODO 机构id
+        Long companyId = 1232141425L;
+        courseBaseInfoService.deleteCourseBase(courseId, companyId);
+    }
 }

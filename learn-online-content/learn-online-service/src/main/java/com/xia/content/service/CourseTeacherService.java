@@ -20,4 +20,12 @@ public interface CourseTeacherService {
      * @return
      */
     CourseTeacher addOrUpdateCourseTeacher(CourseTeacher courseTeacher, Long companyId);
+
+    /**
+     * 根据课程id和教师id删除课程教师信息
+     * @param courseId
+     * @param teacherId
+     * @param companyId
+     */
+    void deleteCourseTeacher(Long courseId, Long teacherId, Long companyId);
 }

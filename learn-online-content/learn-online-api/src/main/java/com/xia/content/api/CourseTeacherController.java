@@ -45,4 +45,18 @@ public class CourseTeacherController {
         Long companyId = 1232141425L;
         return courseTeacherService.addOrUpdateCourseTeacher(courseTeacher, companyId);
     }
+
+    /**
+     * 根据课程id和教师id删除课程教师信息
+     * @param courseId
+     * @param teacherId
+     */
+    @DeleteMapping("/courseTeacher/course/{courseId}/{teacherId}")
+    @ApiOperation("根据课程id和教师id删除课程教师信息")
+    public void deleteCourseTeacher(@PathVariable Long courseId, @PathVariable Long teacherId) {
+        log.info("根据课程id和教师id删除课程教师信息，参数courseId：{}, 参数teacherId：{}", courseId, teacherId);
+        //TODO 机构id
+        Long companyId = 1232141425L;
+        courseTeacherService.deleteCourseTeacher(courseId, teacherId, companyId);
+    }
 }

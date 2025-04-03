@@ -77,6 +77,11 @@
             <artifactId>swagger-spring-boot-starter</artifactId>
         </dependency>
 
+        <!-- nacos 注册中心依赖 -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
 
     </dependencies>
 

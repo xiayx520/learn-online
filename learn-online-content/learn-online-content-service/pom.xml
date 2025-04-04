@@ -2,10 +2,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>learn-online-service</artifactId>
+    <artifactId>learn-online-content-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>learn-online-service</name>
-    <description>learn-online-service</description>
+    <name>learn-online-content-service</name>
+    <description>learn-online-content-service</description>
     <parent>
         <groupId>com.xia</groupId>
         <artifactId>learn-online-content</artifactId>
@@ -14,7 +14,7 @@
     <dependencies>
         <dependency>
             <groupId>com.xia</groupId>
-            <artifactId>learn-online-model</artifactId>
+            <artifactId>learn-online-content-model</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 

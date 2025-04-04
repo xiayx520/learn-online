@@ -2,10 +2,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>learn-online-api</artifactId>
+    <artifactId>learn-online-content-api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>learn-online-api</name>
-    <description>learn-online-api</description>
+    <name>learn-online-content-api</name>
+    <description>learn-online-content-api</description>
     <parent>
         <groupId>com.xia</groupId>
         <artifactId>learn-online-content</artifactId>
@@ -15,7 +15,7 @@
     <dependencies>
         <dependency>
             <groupId>com.xia</groupId>
-            <artifactId>learn-online-service</artifactId>
+            <artifactId>learn-online-content-service</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <!--cloud的基础环境包-->
@@ -61,6 +61,12 @@
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+
+        <!-- nacos 配置中心依赖 -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
         </dependency>
     </dependencies>
 

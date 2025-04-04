@@ -14,9 +14,9 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>learn-online-api</module>
-        <module>learn-online-model</module>
-        <module>learn-online-service</module>
+        <module>learn-online-content-api</module>
+        <module>learn-online-content-model</module>
+        <module>learn-online-content-service</module>
     </modules>
 
 </project>

@@ -14,7 +14,7 @@
         <module>learn-online-content</module>
         <module>learn-online-generator</module>
         <module>learn-online-system</module>
-        <module>learn-online-geteway</module>
+        <module>learn-online-gateway</module>
     </modules>
 
     <properties>

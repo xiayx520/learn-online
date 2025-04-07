@@ -7,6 +7,7 @@ import com.xia.media.service.UploadBigFilesService;
 import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
@@ -19,6 +20,9 @@ public class UploadBigFilesServiceImpl implements UploadBigFilesService {
 
     @Autowired
     private MinioClient minioClient;
+
+    @Value("${minio.bucket.videofiles}")
+    private String bucket_videoFiles;
 
     /**
      * 检查文件是否存在
@@ -52,5 +56,42 @@ public class UploadBigFilesServiceImpl implements UploadBigFilesService {
             }
         }
         return RestResponse.success(false);
+    }
+
+
+    /**
+     * 检查分块文件是否存在
+     * @param fileMd5
+     * @param chunkIndex
+     * @return
+     */
+    @Override
+    public RestResponse<Boolean> checkChunk(String fileMd5, Integer chunkIndex) {
+        //得到分块文件目录
+        String chunkFileFolderPath = getChunkFileFolderPath(fileMd5);
+        //得到分块文件的路径
+        String chunkFilePath = chunkFileFolderPath + chunkIndex;
+
+        try {
+            InputStream fileInputStream = minioClient.getObject(
+                    GetObjectArgs.builder()
+                            .bucket(bucket_videoFiles)
+                            .object(chunkFilePath)
+                            .build());
+
+            if (fileInputStream != null) {
+                //分块已存在
+                return RestResponse.success(true);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //分块未存在
+        return RestResponse.success(false);
+    }
+
+    //得到分块文件的目录
+    private String getChunkFileFolderPath(String fileMd5) {
+        return fileMd5.substring(0, 1) + "/" + fileMd5.substring(1, 2) + "/" + fileMd5 + "/" + "chunk" + "/";
     }
 }

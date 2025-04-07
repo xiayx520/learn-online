@@ -29,4 +29,17 @@ public class UploadBigFilesController {
         return uploadBigFilesService.checkFile(fileMd5);
     }
 
+
+    /**
+     * 检查分块文件是否存在
+     * @param fileMd5
+     * @param chunkIndex
+     * @return
+     */
+    @ApiOperation("检查分块文件是否存在")
+    @PostMapping("/upload/checkchunk")
+    public RestResponse<Boolean> checkChunk(String fileMd5, Integer chunkIndex) {
+        log.info("检查分块文件是否存在,fileMd5:{},chunk:{}", fileMd5, chunkIndex);
+        return uploadBigFilesService.checkChunk(fileMd5, chunkIndex);
+    }
 }

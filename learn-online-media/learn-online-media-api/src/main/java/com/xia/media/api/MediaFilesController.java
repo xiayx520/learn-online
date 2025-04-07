@@ -5,13 +5,18 @@ import com.xia.base.model.PageParams;
 import com.xia.base.model.PageResult;
 import com.xia.media.model.dto.QueryMediaParamsDto;
 import com.xia.media.model.po.MediaFiles;
+import com.xia.media.model.vo.UploadFileResultVO;
 import com.xia.media.service.MediaFileService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 /**
  * @author Mr.M
@@ -34,6 +39,18 @@ public class MediaFilesController {
         Long companyId = 1232141425L;
         return mediaFileService.queryMediaFiels(companyId, pageParams, queryMediaParamsDto);
 
+    }
+
+    /**
+     * 上传文件
+     * @param file
+     * @return
+     */
+    @ApiOperation("上传文件")
+    @PostMapping("/upload/coursefile")
+    public UploadFileResultVO uploadFile(@RequestPart("filedata") MultipartFile file) throws IOException {
+        Long companyId = 1232141425L;
+        return mediaFileService.uploadFile(companyId, file);
     }
 
 }

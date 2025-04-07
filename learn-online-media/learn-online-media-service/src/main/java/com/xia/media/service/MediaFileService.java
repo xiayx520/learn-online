@@ -4,6 +4,10 @@ import com.xia.base.model.PageParams;
 import com.xia.base.model.PageResult;
 import com.xia.media.model.dto.QueryMediaParamsDto;
 import com.xia.media.model.po.MediaFiles;
+import com.xia.media.model.vo.UploadFileResultVO;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 /**
  * @description 媒资文件管理业务类
@@ -24,4 +28,11 @@ public interface MediaFileService {
  public PageResult<MediaFiles> queryMediaFiels(Long companyId,PageParams pageParams, QueryMediaParamsDto queryMediaParamsDto);
 
 
+    /**
+     * @description 上传文件
+     * @param companyId
+     * @param file
+     * @return
+     */
+    UploadFileResultVO uploadFile(Long companyId, MultipartFile file) throws IOException;
 }

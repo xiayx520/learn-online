@@ -59,4 +59,20 @@ public class UploadBigFilesController {
         log.info("上传分块文件,fileMd5:{},chunk:{}", fileMd5, chunk);
         return uploadBigFilesService.uploadChunk(file, fileMd5, chunk);
     }
+
+
+    /**
+     * 合并文件
+     * @param fileMd5
+     * @param fileName
+     * @param chunkTotal
+     * @return
+     */
+    @ApiOperation(value = "合并文件")
+    @PostMapping("/upload/mergechunks")
+    public RestResponse<Boolean> mergechunks(String fileMd5, String fileName, int chunkTotal){
+        Long companyId = 1232141425L;
+        log.info("合并文件,fileMd5:{},fileName:{},chunkTotal:{}", fileMd5, fileName, chunkTotal);
+        return uploadBigFilesService.mergechunks(companyId, fileMd5, fileName, chunkTotal);
+    }
 }

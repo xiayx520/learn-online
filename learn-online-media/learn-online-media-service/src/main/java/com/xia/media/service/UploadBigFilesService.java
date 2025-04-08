@@ -33,4 +33,14 @@ public interface UploadBigFilesService {
      * @return
      */
     RestResponse<Boolean> uploadChunk(MultipartFile file, String fileMd5, Integer chunkIndex) throws IOException;
+
+    /**
+     * 合并分块文件
+     * @param companyId
+     * @param fileMd5
+     * @param fileName
+     * @param chunkTotal
+     * @return
+     */
+    RestResponse<Boolean> mergechunks(Long companyId, String fileMd5, String fileName, int chunkTotal);
 }

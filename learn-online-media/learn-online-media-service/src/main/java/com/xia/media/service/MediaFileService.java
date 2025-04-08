@@ -3,6 +3,7 @@ package com.xia.media.service;
 import com.xia.base.model.PageParams;
 import com.xia.base.model.PageResult;
 import com.xia.media.model.dto.QueryMediaParamsDto;
+import com.xia.media.model.dto.UploadFileParamsDto;
 import com.xia.media.model.po.MediaFiles;
 import com.xia.media.model.vo.UploadFileResultVO;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,4 +36,15 @@ public interface MediaFileService {
      * @return
      */
     UploadFileResultVO uploadFile(Long companyId, MultipartFile file) throws IOException;
+
+
+    /**
+     * @description 将文件信息添加到文件表
+     * @param objectName
+     * @param fileMd5
+     * @param companyId
+     * @param uploadFileParamsDto
+     * @return
+     */
+    MediaFiles addMediaFilesToDB(String objectName, String fileMd5, Long companyId, UploadFileParamsDto uploadFileParamsDto, String bucket);
 }

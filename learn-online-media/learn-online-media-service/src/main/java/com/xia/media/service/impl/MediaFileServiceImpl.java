@@ -104,7 +104,7 @@ public class MediaFileServiceImpl implements MediaFileService {
         //上传文件
         addMediaFilesToMinIO(bucket, objectName, filePath, getMimeType(extension));
         //记录文件信息到数据库
-        MediaFiles mediaFiles = addMediaFilesToDB(objectName, fileMd5, companyId, uploadFileParamsDto);
+        MediaFiles mediaFiles = addMediaFilesToDB(objectName, fileMd5, companyId, uploadFileParamsDto, bucket);
         //删除临时文件
         tempFile.delete();
         //返回上传的结果
@@ -115,7 +115,7 @@ public class MediaFileServiceImpl implements MediaFileService {
     }
 
     //添加文件信息到数据库
-    public MediaFiles addMediaFilesToDB(String objectName, String fileMd5, Long companyId, UploadFileParamsDto uploadFileParamsDto) {
+    public MediaFiles addMediaFilesToDB(String objectName, String fileMd5, Long companyId, UploadFileParamsDto uploadFileParamsDto, String bucket) {
         MediaFiles mediaFiles = mediaFilesMapper.selectById(fileMd5);
         //判断文件是否存在
         if (mediaFiles == null) {

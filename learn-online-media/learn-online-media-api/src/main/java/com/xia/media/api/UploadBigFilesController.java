@@ -8,6 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @Slf4j
@@ -33,13 +36,27 @@ public class UploadBigFilesController {
     /**
      * 检查分块文件是否存在
      * @param fileMd5
-     * @param chunkIndex
+     * @param chunk
      * @return
      */
     @ApiOperation("检查分块文件是否存在")
     @PostMapping("/upload/checkchunk")
-    public RestResponse<Boolean> checkChunk(String fileMd5, Integer chunkIndex) {
-        log.info("检查分块文件是否存在,fileMd5:{},chunk:{}", fileMd5, chunkIndex);
-        return uploadBigFilesService.checkChunk(fileMd5, chunkIndex);
+    public RestResponse<Boolean> checkChunk(String fileMd5, Integer chunk) {
+        log.info("检查分块文件是否存在,fileMd5:{},chunk:{}", fileMd5, chunk);
+        return uploadBigFilesService.checkChunk(fileMd5, chunk);
+    }
+
+    /**
+     * 上传分块文件
+     * @param file
+     * @param fileMd5
+     * @param chunk
+     * @return
+     */
+    @ApiOperation("上传分块文件")
+    @PostMapping("/upload/uploadchunk")
+    public RestResponse<Boolean> uploadChunk(MultipartFile file, String fileMd5, Integer chunk) throws IOException {
+        log.info("上传分块文件,fileMd5:{},chunk:{}", fileMd5, chunk);
+        return uploadBigFilesService.uploadChunk(file, fileMd5, chunk);
     }
 }

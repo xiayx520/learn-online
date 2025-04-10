@@ -8,9 +8,11 @@ import com.xia.base.exception.GlobalException;
 import com.xia.base.model.PageParams;
 import com.xia.base.model.PageResult;
 import com.xia.media.mapper.MediaFilesMapper;
+import com.xia.media.mapper.MediaProcessMapper;
 import com.xia.media.model.dto.QueryMediaParamsDto;
 import com.xia.media.model.dto.UploadFileParamsDto;
 import com.xia.media.model.po.MediaFiles;
+import com.xia.media.model.po.MediaProcess;
 import com.xia.media.model.vo.UploadFileResultVO;
 import com.xia.media.service.MediaFileService;
 import io.minio.MinioClient;
@@ -23,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -51,6 +54,9 @@ public class MediaFileServiceImpl implements MediaFileService {
 
     @Value("${minio.bucket.files}")
     private String bucket;
+
+    @Autowired
+    private MediaProcessMapper mediaProcessMapper;
 
     @Override
     public PageResult<MediaFiles> queryMediaFiels(Long companyId, PageParams pageParams, QueryMediaParamsDto queryMediaParamsDto) {
@@ -115,6 +121,7 @@ public class MediaFileServiceImpl implements MediaFileService {
     }
 
     //添加文件信息到数据库
+    @Transactional
     public MediaFiles addMediaFilesToDB(String objectName, String fileMd5, Long companyId, UploadFileParamsDto uploadFileParamsDto, String bucket) {
         MediaFiles mediaFiles = mediaFilesMapper.selectById(fileMd5);
         //判断文件是否存在
@@ -136,8 +143,25 @@ public class MediaFileServiceImpl implements MediaFileService {
                 throw new GlobalException("文件信息写入数据库失败");
             }
             log.debug("向数据库写入文件记录成功,{}", mediaFiles);
+            //添加到待处理任务表
+            addWaitingTask(mediaFiles);
         }
         return mediaFiles;
+    }
+
+    public void addWaitingTask(MediaFiles mediaFiles) {
+        String fileName = mediaFiles.getFilename();
+        String extension = fileName.substring(fileName.lastIndexOf("."));
+        String mimeType = getMimeType(extension);
+        if (mimeType.equals("video/x-msvideo")) {
+            MediaProcess mediaProcess = new MediaProcess();
+            BeanUtils.copyProperties(mediaFiles, mediaProcess);
+            mediaProcess.setStatus("1");
+            mediaProcess.setFailCount(0);
+            mediaProcess.setCreateDate(LocalDateTime.now());
+            mediaProcessMapper.insert(mediaProcess);
+            log.debug("向待处理任务表写入记录成功,{}", mediaProcess);
+        }
     }
 
     //获取文件类型

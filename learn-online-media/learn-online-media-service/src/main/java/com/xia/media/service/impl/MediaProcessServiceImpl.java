@@ -84,6 +84,7 @@ public class MediaProcessServiceImpl implements MediaProcessService {
             mediaProcess.setStatus("2");
             mediaProcess.setUrl(url);
             mediaProcess.setFinishDate(LocalDateTime.now());
+            mediaProcess.setErrormsg(errorMsg);
             mediaProcessMapper.updateById(mediaProcess);
             //更新文件表记录
             MediaFiles mediaFiles = mediaFilesMapper.selectById(fileId);

@@ -3,6 +3,7 @@ package com.xia.media.service;
 import com.xia.base.model.RestResponse;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -43,4 +44,13 @@ public interface UploadBigFilesService {
      * @return
      */
     RestResponse<Boolean> mergechunks(Long companyId, String fileMd5, String fileName, int chunkTotal);
+
+
+    /**
+     * 从minio下载文件
+     * @param bucket
+     * @param objectName
+     * @return
+     */
+    File downloadFileFromMinIO(String bucket, String objectName);
 }

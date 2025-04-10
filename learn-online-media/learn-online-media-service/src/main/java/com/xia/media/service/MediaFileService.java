@@ -47,4 +47,13 @@ public interface MediaFileService {
      * @return
      */
     MediaFiles addMediaFilesToDB(String objectName, String fileMd5, Long companyId, UploadFileParamsDto uploadFileParamsDto, String bucket);
+
+    /**
+     * @description 将文件信息上传到minio
+     * @param bucket
+     * @param objectName
+     * @param filePath
+     * @param mimeType
+     */
+    void addMediaFilesToMinIO(String bucket, String objectName, String filePath, String mimeType);
 }

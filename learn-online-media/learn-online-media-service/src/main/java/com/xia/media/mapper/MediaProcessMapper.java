@@ -30,7 +30,7 @@ public interface MediaProcessMapper extends BaseMapper<MediaProcess> {
             "and (t.status = '1' or t.status = '3') " +
             "and t.fail_count < 3 " +
             "limit #{count}")
-    List<MediaProcess> selectListByShardIndex(@Param("shardTotal") int shardTotal, @Param("shardIndex") int shardIndex, @Param("count") int count);
+    List<MediaProcess> selectListByShardIndex(@Param("shardIndex") int shardIndex, @Param("shardTotal") int shardTotal, @Param("count") int count);
 
     /**
      * 更新任务状态

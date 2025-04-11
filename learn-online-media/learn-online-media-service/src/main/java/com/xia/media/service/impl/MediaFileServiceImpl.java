@@ -7,6 +7,7 @@ import com.j256.simplemagic.ContentInfoUtil;
 import com.xia.base.exception.GlobalException;
 import com.xia.base.model.PageParams;
 import com.xia.base.model.PageResult;
+import com.xia.base.model.RestResponse;
 import com.xia.media.mapper.MediaFilesMapper;
 import com.xia.media.mapper.MediaProcessMapper;
 import com.xia.media.model.dto.QueryMediaParamsDto;
@@ -207,5 +208,23 @@ public class MediaFileServiceImpl implements MediaFileService {
             log.error("上传文件到minio出错,bucket:{},objectName:{},错误原因:{}", bucket, objectName, e.getMessage(), e);
             throw new GlobalException("上传文件到文件系统失败");
         }
+    }
+
+    @Override
+    public RestResponse<String> getPlayUrl(String mediaId) {
+        if (StringUtils.isBlank(mediaId)) {
+            return RestResponse.validfail("文件id为空", "false");
+        }
+        MediaFiles mediaFiles = mediaFilesMapper.selectById(mediaId);
+        if (mediaFiles == null) {
+            return RestResponse.validfail("文件不存在", "false");
+        }
+
+        String url = mediaFiles.getUrl();
+        if (StringUtils.isBlank(url)) {
+            return RestResponse.validfail("文件路径为空", "false");
+        }
+
+        return RestResponse.success(url);
     }
 }

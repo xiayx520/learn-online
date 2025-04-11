@@ -2,6 +2,7 @@ package com.xia.media.service;
 
 import com.xia.base.model.PageParams;
 import com.xia.base.model.PageResult;
+import com.xia.base.model.RestResponse;
 import com.xia.media.model.dto.QueryMediaParamsDto;
 import com.xia.media.model.dto.UploadFileParamsDto;
 import com.xia.media.model.po.MediaFiles;
@@ -56,4 +57,12 @@ public interface MediaFileService {
      * @param mimeType
      */
     void addMediaFilesToMinIO(String bucket, String objectName, String filePath, String mimeType);
+
+
+    /**
+     * @description 根据md5值查询文件
+     * @param mediaId
+     * @return
+     */
+    RestResponse<String> getPlayUrl(String mediaId);
 }

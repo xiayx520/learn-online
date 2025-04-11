@@ -184,6 +184,22 @@ public class TeachPlanServiceImpl implements TeachPlanService {
 
     }
 
+    @Override
+    public void deleteTeachPlanMedia(Long teachPlanId, String mediaId) {
+        //判断媒资文件id是否为空
+        if (mediaId == null) {
+            throw new GlobalException("媒资文件id为空");
+        }
+        //判断教学计划id是否为空
+        if (teachPlanId == null) {
+            throw new GlobalException("教学计划id为空");
+        }
+
+        teachplanMediaMapper.delete(new LambdaQueryWrapper<TeachplanMedia>()
+                .eq(TeachplanMedia::getTeachplanId, teachPlanId)
+                .eq(TeachplanMedia::getMediaId, mediaId));
+    }
+
     private int getTeachplanCount(Long courseId, Long parentId) {
         LambdaQueryWrapper<Teachplan> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Teachplan::getCourseId, courseId)

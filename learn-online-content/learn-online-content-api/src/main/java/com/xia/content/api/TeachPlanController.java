@@ -1,6 +1,7 @@
 package com.xia.content.api;
 
 
+import com.xia.content.model.dto.BindTeachplanMediaDto;
 import com.xia.content.model.dto.SaveTeachplanDto;
 import com.xia.content.model.vo.TeachPlanVO;
 import com.xia.content.service.TeachPlanService;
@@ -62,6 +63,17 @@ public class TeachPlanController {
     @PostMapping("/teachplan/{moveType}/{id}")
     public void moveTeachPlan(@PathVariable String moveType, @PathVariable Long id) {
         teachPlanService.moveTeachPlan(moveType, id);
+    }
+
+
+    /**
+     * 绑定媒资信息
+     * @param bindTeachplanMediaDto
+     */
+    @ApiOperation("绑定媒资信息")
+    @PostMapping("/teachplan/association/media")
+    public void associationMedia(@RequestBody BindTeachplanMediaDto bindTeachplanMediaDto) {
+        teachPlanService.associationMedia(bindTeachplanMediaDto);
     }
 
 }

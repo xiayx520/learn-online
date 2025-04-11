@@ -1,5 +1,6 @@
 package com.xia.content.service;
 
+import com.xia.content.model.dto.BindTeachplanMediaDto;
 import com.xia.content.model.dto.SaveTeachplanDto;
 import com.xia.content.model.vo.TeachPlanVO;
 
@@ -33,4 +34,11 @@ public interface TeachPlanService {
      * @param id
      */
     void moveTeachPlan(String moveType, Long id);
+
+
+    /**
+     * 绑定媒资
+     * @param bindTeachplanMediaDto
+     */
+    void associationMedia(BindTeachplanMediaDto bindTeachplanMediaDto);
 }

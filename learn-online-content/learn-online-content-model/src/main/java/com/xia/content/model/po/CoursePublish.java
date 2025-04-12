@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -145,12 +146,12 @@ public class CoursePublish implements Serializable {
     /**
      * 现价
      */
-    private Float price;
+    private BigDecimal price;
 
     /**
      * 原价
      */
-    private Float originalPrice;
+    private BigDecimal originalPrice;
 
     /**
      * 课程有效期天数

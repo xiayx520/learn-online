@@ -1,7 +1,14 @@
 package com.xia.content.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.xia.base.exception.GlobalException;
+import com.xia.content.mapper.CourseBaseMapper;
+import com.xia.content.mapper.CourseMarketMapper;
 import com.xia.content.mapper.CoursePublishMapper;
+import com.xia.content.mapper.CoursePublishPreMapper;
+import com.xia.content.model.po.CourseBase;
+import com.xia.content.model.po.CourseMarket;
+import com.xia.content.model.po.CoursePublishPre;
 import com.xia.content.model.po.CourseTeacher;
 import com.xia.content.model.vo.CourseBaseInfoVO;
 import com.xia.content.model.vo.CoursePreviewVO;
@@ -10,9 +17,13 @@ import com.xia.content.service.CourseBaseInfoService;
 import com.xia.content.service.CoursePublishService;
 import com.xia.content.service.CourseTeacherService;
 import com.xia.content.service.TeachPlanService;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -31,6 +42,14 @@ public class CoursePublishServiceImpl implements CoursePublishService {
 
     @Autowired
     private TeachPlanService teachPlanService;
+
+    @Autowired
+    private CourseBaseMapper courseBaseMapper;
+
+    @Autowired
+    private CourseMarketMapper courseMarketMapper;
+    @Autowired
+    private CoursePublishPreMapper coursePublishPreMapper;
 
     /**
      * 根据课程id查询课程发布信息
@@ -53,4 +72,84 @@ public class CoursePublishServiceImpl implements CoursePublishService {
 
         return coursePreviewVO;
     }
+
+
+    /**
+     * 提交课程审核
+     * @param courseId
+     */
+    @Override
+    @Transactional
+    public void commitAudit(Long companyId, Long courseId) {
+        if(courseId == null) {
+            throw new GlobalException("课程id为空");
+        }
+        //约束校验
+        CourseBase courseBase = courseBaseMapper.selectById(courseId);
+        //课程审核状态
+        String auditStatus = courseBase.getAuditStatus();
+
+        //当前审核状态为已提交不允许再次提交
+        if("202003".equals(auditStatus)){
+            throw new GlobalException("当前为等待审核状态，审核完成可以再次提交。");
+        }
+        //本机构只允许提交本机构的课程
+        if(!courseBase.getCompanyId().equals(companyId)){
+            throw new GlobalException("不允许提交其它机构的课程。");
+        }
+
+        //课程图片是否填写
+        if(StringUtils.isEmpty(courseBase.getPic())){
+            throw new GlobalException("提交失败，请上传课程图片");
+        }
+
+        //添加课程预发布记录
+        CoursePublishPre coursePublishPre = new CoursePublishPre();
+        //课程基本信息
+        CourseBaseInfoVO courseBaseInfoVO = courseBaseInfoService.getCourseBaseInfo(courseId);
+        BeanUtils.copyProperties(courseBaseInfoVO,coursePublishPre);
+
+        //课程营销信息
+        CourseMarket courseMarket = courseMarketMapper.selectById(courseId);
+        //转化为json
+        String courseMarketJson = JSON.toJSONString(courseMarket);
+        coursePublishPre.setMarket(courseMarketJson);
+
+        //课程计划
+        List<TeachPlanVO> teachPlanTreeNodes = teachPlanService.getTeachPlanTree(courseId);
+        if(teachPlanTreeNodes == null || teachPlanTreeNodes.isEmpty()){
+            throw new GlobalException("提交失败，还没有添加课程计划");
+        }
+        String teachplan = JSON.toJSONString(teachPlanTreeNodes);
+        coursePublishPre.setTeachplan(teachplan);
+
+        //师资信息
+        List<CourseTeacher> courseTeachers = courseTeacherService.getCourseTeacher(courseId);
+        if(courseTeachers == null || courseTeachers.isEmpty()){
+            throw new GlobalException("提交失败，还没有添加师资信息");
+        }
+        //转化为json
+        String courseTeachersJson = JSON.toJSONString(courseTeachers);
+        coursePublishPre.setTeachers(courseTeachersJson);
+
+        //机构id
+        coursePublishPre.setCompanyId(companyId);
+        //审核状态
+        coursePublishPre.setStatus("202003");
+        //创建时间
+        coursePublishPre.setCreateDate(LocalDateTime.now());
+
+        CoursePublishPre coursePublishPreUpdate = coursePublishPreMapper.selectById(courseId);
+        if(coursePublishPreUpdate == null){
+            //添加课程预发布记录
+            coursePublishPreMapper.insert(coursePublishPre);
+        }else{
+            coursePublishPreMapper.updateById(coursePublishPre);
+        }
+
+        //更新课程基本表的审核状态
+        courseBase.setAuditStatus("202003");
+        courseBaseMapper.updateById(courseBase);
+    }
+
 }

@@ -10,4 +10,10 @@ public interface CoursePublishService {
      * @return
      */
     CoursePreviewVO getCoursePreviewVO(Long courseId);
+
+    /**
+     * 课程发布
+     * @param courseId
+     */
+    void commitAudit(Long companyId, Long courseId);
 }

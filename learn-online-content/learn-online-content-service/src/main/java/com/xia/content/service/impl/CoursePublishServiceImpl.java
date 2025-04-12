@@ -6,10 +6,7 @@ import com.xia.content.mapper.CourseBaseMapper;
 import com.xia.content.mapper.CourseMarketMapper;
 import com.xia.content.mapper.CoursePublishMapper;
 import com.xia.content.mapper.CoursePublishPreMapper;
-import com.xia.content.model.po.CourseBase;
-import com.xia.content.model.po.CourseMarket;
-import com.xia.content.model.po.CoursePublishPre;
-import com.xia.content.model.po.CourseTeacher;
+import com.xia.content.model.po.*;
 import com.xia.content.model.vo.CourseBaseInfoVO;
 import com.xia.content.model.vo.CoursePreviewVO;
 import com.xia.content.model.vo.TeachPlanVO;
@@ -75,7 +72,7 @@ public class CoursePublishServiceImpl implements CoursePublishService {
 
 
     /**
-     * 提交课程审核
+     * 课程提交审核
      * @param courseId
      */
     @Override
@@ -149,6 +146,63 @@ public class CoursePublishServiceImpl implements CoursePublishService {
 
         //更新课程基本表的审核状态
         courseBase.setAuditStatus("202003");
+        courseBaseMapper.updateById(courseBase);
+    }
+
+    /**
+     * 课程发布
+     * @param companyId
+     * @param courseId
+     */
+    @Override
+    @Transactional
+    public void publishCourse(Long companyId, Long courseId) {
+        if(courseId == null) {
+            throw new GlobalException("课程id为空");
+        }
+        CoursePublishPre coursePublishPre = coursePublishPreMapper.selectById(courseId);
+        if(coursePublishPre == null){
+            throw new GlobalException("请先提交课程审核，审核通过才可以发布");
+        }
+        if(!companyId.equals(coursePublishPre.getCompanyId())){
+            throw new GlobalException("本机构没有该课程的权限");
+        }
+        if(!coursePublishPre.getStatus().equals("202004")){
+            throw new GlobalException("课程没有审核通过");
+        }
+        //保存课程发布信息
+        saveCoursePublish(coursePublishPre, courseId);
+
+        //保存消息表
+        saveCoursePublishMessage(courseId);
+
+        //删除课程预发布表对应记录
+        coursePublishPreMapper.deleteById(courseId);
+
+    }
+
+    private void saveCoursePublishMessage(Long courseId) {
+
+    }
+
+    private void saveCoursePublish(CoursePublishPre coursePublishPre, Long courseId) {
+        //整合课程发布信息
+
+        CoursePublish coursePublish = new CoursePublish();
+
+        //拷贝到课程发布对象
+        BeanUtils.copyProperties(coursePublishPre,coursePublish);
+        //设置发布状态
+        coursePublish.setStatus("203002");
+        CoursePublish coursePublishUpdate = coursePublishMapper.selectById(courseId);
+        if(coursePublishUpdate == null){
+            coursePublishMapper.insert(coursePublish);
+        }else{
+            coursePublishMapper.updateById(coursePublish);
+        }
+        //更新课程基本表的发布状态
+        CourseBase courseBase = courseBaseMapper.selectById(courseId);
+        courseBase.setStatus("203002");
         courseBaseMapper.updateById(courseBase);
     }
 

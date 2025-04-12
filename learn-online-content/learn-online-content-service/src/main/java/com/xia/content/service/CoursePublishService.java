@@ -12,8 +12,15 @@ public interface CoursePublishService {
     CoursePreviewVO getCoursePreviewVO(Long courseId);
 
     /**
-     * 课程发布
+     * 课程提交审核
      * @param courseId
      */
     void commitAudit(Long companyId, Long courseId);
+
+    /**
+     * 课程发布
+     * @param companyId
+     * @param courseId
+     */
+    void publishCourse(Long companyId, Long courseId);
 }

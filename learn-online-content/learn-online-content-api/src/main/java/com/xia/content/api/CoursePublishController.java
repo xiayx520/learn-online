@@ -52,14 +52,30 @@ public class CoursePublishController {
 
 
     /**
-     * 课程发布提交
+     * 课程提交审核
      * @param courseId
      */
-    @ResponseBody
     @PostMapping("/courseaudit/commit/{courseId}")
+    @ApiOperation("课程提交审核")
+    @ResponseBody
     public void commitAudit(@PathVariable("courseId") Long courseId){
-        log.info("课程发布提交：{}", courseId);
+        log.info("课程提交审核：{}", courseId);
         Long companyId = 1232141425L;
         coursePublishService.commitAudit(companyId, courseId);
     }
+
+
+    /**
+     * 课程发布
+     * @param courseId
+     */
+    @PostMapping("/coursepublish/{courseId}")
+    @ApiOperation("课程发布")
+    @ResponseBody
+    public void publishCourse(@PathVariable("courseId") Long courseId){
+        log.info("课程发布：{}", courseId);
+        Long companyId = 1232141425L;
+        coursePublishService.publishCourse(companyId, courseId);
+    }
+
 }

@@ -156,5 +156,5 @@ function uuid() {
 }
 
 function showlogin(){
-    window.location = "http://www.51xuecheng.cn/sign.html?returnUrl="+ Base64.encode(window.location)
+    window.location = "http://localhost/sign.html?returnUrl="+ Base64.encode(window.location)
 }

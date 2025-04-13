@@ -4,23 +4,23 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>页头</title>
-    <link rel="stylesheet" href="http://www.51xuecheng.cn/static/plugins/normalize-css/normalize.css" />
-    <link rel="stylesheet" href="http://www.51xuecheng.cn/static/plugins/bootstrap/dist/css/bootstrap.css" />
-    <link rel="stylesheet" href="http://www.51xuecheng.cn/static/css/page-learing-article.css" />
-    <link rel="stylesheet" href="http://www.51xuecheng.cn/static/css/page-learing-index.css" />
-    <link rel="stylesheet" href="http://www.51xuecheng.cn/static/css/page-header.css" />
-    <link rel="stylesheet" href="http://www.51xuecheng.cn/static/css/el/index.css" />
-    <link rel="stylesheet" href="http://www.51xuecheng.cn/static/css/main.css" />
+    <link rel="stylesheet" href="http://localhost/static/plugins/normalize-css/normalize.css" />
+    <link rel="stylesheet" href="http://localhost/static/plugins/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="http://localhost/static/css/page-learing-article.css" />
+    <link rel="stylesheet" href="http://localhost/static/css/page-learing-index.css" />
+    <link rel="stylesheet" href="http://localhost/static/css/page-header.css" />
+    <link rel="stylesheet" href="http://localhost/static/css/el/index.css" />
+    <link rel="stylesheet" href="http://localhost/static/css/main.css" />
 
-    <script src="http://www.51xuecheng.cn/static/js/vue/vue.min.js"></script>
-    <script src="http://www.51xuecheng.cn/static/js/jwt-decode/jwt-decode.min.js"></script>
-    <script src="http://www.51xuecheng.cn/static/js/base64.min.js"></script>
-    <script src="http://www.51xuecheng.cn/static/js/axios/axios.min.js"></script>
-    <script src="http://www.51xuecheng.cn/static/js/querystring/index.js"></script>
-    <script src="http://www.51xuecheng.cn/static/js/util.js"></script>
-    <script src="http://www.51xuecheng.cn/static/js/public.js"></script>
-    <script src="http://www.51xuecheng.cn/static/js/login.js"></script>
-    <script src="http://www.51xuecheng.cn/static/css/el/index.js"></script>
+    <script src="http://localhost/static/js/vue/vue.min.js"></script>
+    <script src="http://localhost/static/js/jwt-decode/jwt-decode.min.js"></script>
+    <script src="http://localhost/static/js/base64.min.js"></script>
+    <script src="http://localhost/static/js/axios/axios.min.js"></script>
+    <script src="http://localhost/static/js/querystring/index.js"></script>
+    <script src="http://localhost/static/js/util.js"></script>
+    <script src="http://localhost/static/js/public.js"></script>
+    <script src="http://localhost/static/js/login.js"></script>
+    <script src="http://localhost/static/css/el/index.js"></script>
 </head>
 <body >
 <div id="app">
@@ -29,11 +29,11 @@
     <div class="learingHeader">
         <nav class="navbar">
             <div class="">
-                <div class="logo"><img src="http://www.51xuecheng.cn/static/img/asset-logoIco.png" width="100%" alt=""></div>
+                <div class="logo"><img src="http://localhost/static/img/asset-logoIco.png" width="100%" alt=""></div>
                 <div class="nav-list">
                     <ul class="nav navbar-nav">
-                        <li ><a href="http://www.51xuecheng.cn">首页</a></li>
-                        <li><a href="http://www.51xuecheng.cn/course/search.html">课程</a></li>
+                        <li ><a href="http://localhost">首页</a></li>
+                        <li><a href="http://localhost/course/search.html">课程</a></li>
                         <li><a href="#">职业规划</a></li>
                         <li></li>
                     </ul>
@@ -91,10 +91,10 @@
         methods: {
             search() {
                 if (this.keywords === '') {
-                    window.location = "http://www.51xuecheng.cn/course/search.html"
+                    window.location = "http://localhost/course/search.html"
                 } else {
                     let keywords = encodeURIComponent(this.keywords)
-                    window.location = "http://www.51xuecheng.cn/course/search.html?keywords="+keywords
+                    window.location = "http://localhost/course/search.html?keywords="+keywords
                 }
             },
            logout: function () {
@@ -148,7 +148,7 @@
                 this.$refs[formName].resetFields();
             },
             showlogin: function(){
-                window.location = "http://www.51xuecheng.cn/sign.html?returnUrl="+ Base64.encode(window.location)
+                window.location = "http://localhost/sign.html?returnUrl="+ Base64.encode(window.location)
             }
         },
        created() {

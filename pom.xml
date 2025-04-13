@@ -16,6 +16,7 @@
         <module>learn-online-system</module>
         <module>learn-online-gateway</module>
         <module>learn-online-media</module>
+        <module>learn-online-message-sdk</module>
     </modules>
 
     <properties>

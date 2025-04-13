@@ -1,6 +1,7 @@
 package com.xia.content.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.xia.base.exception.CommonError;
 import com.xia.base.exception.GlobalException;
 import com.xia.content.mapper.CourseBaseMapper;
 import com.xia.content.mapper.CourseMarketMapper;
@@ -14,6 +15,8 @@ import com.xia.content.service.CourseBaseInfoService;
 import com.xia.content.service.CoursePublishService;
 import com.xia.content.service.CourseTeacherService;
 import com.xia.content.service.TeachPlanService;
+import com.xia.messagesdk.model.po.MqMessage;
+import com.xia.messagesdk.service.MqMessageService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +50,8 @@ public class CoursePublishServiceImpl implements CoursePublishService {
     private CourseMarketMapper courseMarketMapper;
     @Autowired
     private CoursePublishPreMapper coursePublishPreMapper;
+    @Autowired
+    private MqMessageService mqMessageService;
 
     /**
      * 根据课程id查询课程发布信息
@@ -182,6 +187,10 @@ public class CoursePublishServiceImpl implements CoursePublishService {
     }
 
     private void saveCoursePublishMessage(Long courseId) {
+        MqMessage mqMessage = mqMessageService.addMessage("course_publish", String.valueOf(courseId), null, null);
+        if(mqMessage==null){
+            throw new GlobalException(CommonError.UNKOWN_ERROR.getErrMessage());
+        }
 
     }
 
@@ -194,6 +203,8 @@ public class CoursePublishServiceImpl implements CoursePublishService {
         BeanUtils.copyProperties(coursePublishPre,coursePublish);
         //设置发布状态
         coursePublish.setStatus("203002");
+        coursePublish.setCreateDate(LocalDateTime.now());
+        coursePublish.setOnlineDate(LocalDateTime.now());
         CoursePublish coursePublishUpdate = coursePublishMapper.selectById(courseId);
         if(coursePublishUpdate == null){
             coursePublishMapper.insert(coursePublish);

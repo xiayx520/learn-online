@@ -67,6 +67,7 @@ public class MqMessageServiceImpl extends ServiceImpl<MqMessageMapper, MqMessage
             //添加到历史表
             MqMessageHistory mqMessageHistory = new MqMessageHistory();
             BeanUtils.copyProperties(mqMessage,mqMessageHistory);
+            mqMessageHistory.setState(1);
             mqMessageHistoryMapper.insert(mqMessageHistory);
             //删除消息表
             mqMessageMapper.deleteById(id);

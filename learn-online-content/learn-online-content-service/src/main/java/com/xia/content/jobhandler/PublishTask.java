@@ -3,6 +3,10 @@ package com.xia.content.jobhandler;
 import com.xia.base.exception.GlobalException;
 import com.xia.content.config.MultipartSupportConfig;
 import com.xia.content.feignclient.MediaServiceClient;
+import com.xia.content.feignclient.SearchServiceClient;
+import com.xia.content.mapper.CoursePublishMapper;
+import com.xia.content.model.po.CourseIndex;
+import com.xia.content.model.po.CoursePublish;
 import com.xia.content.model.vo.CoursePreviewVO;
 import com.xia.content.service.CoursePublishService;
 import com.xia.messagesdk.mapper.MqMessageMapper;
@@ -15,6 +19,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
@@ -41,6 +46,12 @@ public class PublishTask extends MessageProcessAbstract {
 
     @Autowired
     private MqMessageMapper mqMessageMapper;
+
+    @Autowired
+    private SearchServiceClient searchServiceClient;
+
+    @Autowired
+    private CoursePublishMapper coursePublishMapper;
 
     @Override
     public boolean execute(MqMessage mqMessage) {
@@ -77,12 +88,31 @@ public class PublishTask extends MessageProcessAbstract {
     //保存课程索引信息
     public void saveCourseIndex(MqMessage mqMessage, long courseId) {
         log.debug("保存课程索引信息,课程id:{}", courseId);
+        Long taskId = mqMessage.getId();
+        //消息幂等性处理
+        int stageTwo = mqMessageService.getStageTwo(taskId);
+        if (stageTwo > 0) {
+            log.debug("保存课程索引信息,课程id:{},任务已处理,无需处理", courseId);
+            return;
+        }
         try {
-            TimeUnit.SECONDS.sleep(2);
-        } catch (InterruptedException e) {
+            //取出课程发布信息
+            CoursePublish coursePublish = coursePublishMapper.selectById(courseId);
+            //拷贝至课程索引对象
+            CourseIndex courseIndex = new CourseIndex();
+            BeanUtils.copyProperties(coursePublish,courseIndex);
+            //远程调用搜索服务api添加课程信息到索引
+            Boolean add = searchServiceClient.add(courseIndex);
+            if(!add){
+                throw new GlobalException("添加索引失败");
+            }
+
+        } catch (Exception e) {
+            log.error("添加索引失败:{}", e.getMessage());
             throw new RuntimeException(e);
         }
-
+        //保存第二阶段状态
+        mqMessageService.completedStageTwo(taskId);
     }
 
     private void generateCourseHtml(MqMessage mqMessage, long courseId) {

@@ -10,10 +10,10 @@ spring:
     nacos:
       server-addr: 192.168.88.130:8848
       discovery:
-        namespace: dev
+        namespace: ${spring.profiles.active}
         group: learn-online-project
       config:
-        namespace: dev
+        namespace: ${spring.profiles.active}
         group: learn-online-project
         file-extension: yaml
         refresh-enabled: true

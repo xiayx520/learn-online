@@ -10,10 +10,7 @@ import com.xia.media.service.MediaFileService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -48,9 +45,9 @@ public class MediaFilesController {
      */
     @ApiOperation("上传文件")
     @PostMapping("/upload/coursefile")
-    public UploadFileResultVO uploadFile(@RequestPart("filedata") MultipartFile file) throws IOException {
+    public UploadFileResultVO uploadFile(@RequestPart("filedata") MultipartFile file, @RequestParam(value= "objectName",required=false)String objectName) throws IOException {
         Long companyId = 1232141425L;
-        return mediaFileService.uploadFile(companyId, file);
+        return mediaFileService.uploadFile(companyId, file, objectName);
     }
 
 }

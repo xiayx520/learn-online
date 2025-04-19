@@ -59,6 +59,9 @@ public class MediaFileServiceImpl implements MediaFileService {
     @Autowired
     private MediaProcessMapper mediaProcessMapper;
 
+    @Autowired
+    private MediaFileService currentProxy;
+
     @Override
     public PageResult<MediaFiles> queryMediaFiels(Long companyId, PageParams pageParams, QueryMediaParamsDto queryMediaParamsDto) {
 
@@ -89,7 +92,7 @@ public class MediaFileServiceImpl implements MediaFileService {
      * @return
      */
     @Override
-    public UploadFileResultVO uploadFile(Long companyId, MultipartFile file) throws IOException {
+    public UploadFileResultVO uploadFile(Long companyId, MultipartFile file, String objectName) throws IOException {
         //构建文件信息对象
         UploadFileParamsDto uploadFileParamsDto = UploadFileParamsDto.builder()
                 .filename(file.getOriginalFilename())
@@ -107,11 +110,14 @@ public class MediaFileServiceImpl implements MediaFileService {
         //获取文件扩展名
         String extension = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
         //获取objectName
-        String objectName = getObjectName(fileMd5, extension);
+        if(StringUtils.isEmpty(objectName))
+        {
+            objectName = getObjectName(fileMd5, extension);
+        }
         //上传文件
         addMediaFilesToMinIO(bucket, objectName, filePath, getMimeType(extension));
         //记录文件信息到数据库
-        MediaFiles mediaFiles = addMediaFilesToDB(objectName, fileMd5, companyId, uploadFileParamsDto, bucket);
+        MediaFiles mediaFiles = currentProxy.addMediaFilesToDB(objectName, fileMd5, companyId, uploadFileParamsDto, bucket);
         //删除临时文件
         tempFile.delete();
         //返回上传的结果

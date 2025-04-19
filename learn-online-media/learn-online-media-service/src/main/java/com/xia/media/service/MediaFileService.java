@@ -36,7 +36,7 @@ public interface MediaFileService {
      * @param file
      * @return
      */
-    UploadFileResultVO uploadFile(Long companyId, MultipartFile file) throws IOException;
+    UploadFileResultVO uploadFile(Long companyId, MultipartFile file, String objectName) throws IOException;
 
 
     /**

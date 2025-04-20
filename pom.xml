@@ -18,6 +18,7 @@
         <module>learn-online-media</module>
         <module>learn-online-message-sdk</module>
         <module>learn-online-search</module>
+        <module>learn-online-auth</module>
     </modules>
 
     <properties>

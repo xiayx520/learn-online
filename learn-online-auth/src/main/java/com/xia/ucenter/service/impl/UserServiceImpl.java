@@ -1,5 +1,6 @@
 package com.xia.ucenter.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.xia.ucenter.mapper.XcUserMapper;
 import com.xia.ucenter.model.po.XcUser;
@@ -35,9 +36,12 @@ public class UserServiceImpl implements UserDetailsService {
         String password = user.getPassword();
         //用户权限,如果不加报Cannot pass a null GrantedAuthority collection
         String[] authorities = {"test"};
-        //创建UserDetails对象,权限信息待实现授权功能时再向UserDetail中加入
-        UserDetails userDetails = User.withUsername(user.getUsername()).password(password).authorities(authorities).build();
-
+        //为了安全在令牌中不放密码
+        user.setPassword(null);
+        //将user对象转json
+        String userString = JSON.toJSONString(user);
+        //创建UserDetails对象
+        UserDetails userDetails = User.withUsername(userString).password(password).authorities(authorities).build();
         return userDetails;
     }
 

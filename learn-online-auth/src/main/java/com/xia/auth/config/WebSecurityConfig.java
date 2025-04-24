@@ -1,6 +1,8 @@
 package com.xia.auth.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -28,6 +30,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //        manager.createUser(User.withUsername("lisi").password("456").authorities("p2").build());
 //        return manager;
 //    }
+
+    @Autowired
+    DaoAuthenticationProviderCustom daoAuthenticationProviderCustom;
+
+
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.authenticationProvider(daoAuthenticationProviderCustom);
+    }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {

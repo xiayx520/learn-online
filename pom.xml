@@ -19,6 +19,7 @@
         <module>learn-online-message-sdk</module>
         <module>learn-online-search</module>
         <module>learn-online-auth</module>
+        <module>learn-online-checkcode</module>
     </modules>
 
     <properties>

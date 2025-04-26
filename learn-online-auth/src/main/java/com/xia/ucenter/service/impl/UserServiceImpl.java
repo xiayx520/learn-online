@@ -22,9 +22,6 @@ public class UserServiceImpl implements UserDetailsService {
     XcUserMapper xcUserMapper;
 
     @Autowired
-    AuthService authService;
-
-    @Autowired
     ApplicationContext applicationContext;
 
     /**
@@ -72,6 +69,5 @@ public class UserServiceImpl implements UserDetailsService {
         UserDetails userDetails = User.withUsername(userString).password(password).authorities(authorities).build();
         return userDetails;
     }
-
 
 }

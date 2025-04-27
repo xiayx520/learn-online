@@ -20,6 +20,9 @@
         <module>learn-online-search</module>
         <module>learn-online-auth</module>
         <module>learn-online-checkcode</module>
+        <module>learn-online-learning</module>
+
+
     </modules>
 
     <properties>

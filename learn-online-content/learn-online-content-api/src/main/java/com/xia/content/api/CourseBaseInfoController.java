@@ -1,5 +1,6 @@
 package com.xia.content.api;
 
+import com.xia.base.exception.GlobalException;
 import com.xia.base.model.PageParams;
 import com.xia.base.model.PageResult;
 import com.xia.content.model.dto.AddCourseDto;
@@ -8,6 +9,7 @@ import com.xia.content.model.dto.QueryCourseParamsDto;
 import com.xia.content.model.po.CourseBase;
 import com.xia.content.model.vo.CourseBaseInfoVO;
 import com.xia.content.service.CourseBaseInfoService;
+import com.xia.content.utils.SecurityUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -75,8 +77,17 @@ public class CourseBaseInfoController {
     public CourseBaseInfoVO editCourseBase(@RequestBody @Validated EditCourseDto editCourseDto)
     {
         //todo 机构id，由于认证系统没有上线暂时硬编码
-        Long companyId = 1232141425L;
-        return courseBaseInfoService.updateCourseBase(companyId, editCourseDto);
+        SecurityUtil.XcUser user = SecurityUtil.getUser();
+
+        String companyId = null;
+        if (user != null) {
+            companyId = user.getCompanyId();
+        }
+        //判断机构id是否存在
+        if(companyId == null){
+            throw new GlobalException("您不属于机构人员");
+        }
+        return courseBaseInfoService.updateCourseBase(Long.valueOf(companyId), editCourseDto);
     }
 
 

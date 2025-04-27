@@ -26,6 +26,9 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public GlobalExceptionResponse exceptionHandler(Exception e) {
         log.error("【全局异常】{}", e.getMessage());
+        if(e.getMessage().equals("不允许访问")){
+            return new GlobalExceptionResponse("没有操作此功能的权限");
+        }
         return new GlobalExceptionResponse(CommonError.UNKOWN_ERROR.getErrMessage());
     }
 

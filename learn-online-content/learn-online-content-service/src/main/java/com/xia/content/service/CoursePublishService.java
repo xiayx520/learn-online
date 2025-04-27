@@ -1,5 +1,6 @@
 package com.xia.content.service;
 
+import com.xia.content.model.po.CoursePublish;
 import com.xia.content.model.vo.CoursePreviewVO;
 
 public interface CoursePublishService {
@@ -23,4 +24,11 @@ public interface CoursePublishService {
      * @param courseId
      */
     void publishCourse(Long companyId, Long courseId);
+
+    /**
+     * 根据课程id查询课程发布信息
+     * @param courseId
+     * @return
+     */
+    CoursePublish getCoursePublish(Long courseId);
 }

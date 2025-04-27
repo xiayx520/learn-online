@@ -1,5 +1,6 @@
 package com.xia.content.api;
 
+import com.xia.content.model.po.CoursePublish;
 import com.xia.content.model.vo.CoursePreviewVO;
 import com.xia.content.service.CoursePublishService;
 import io.swagger.annotations.Api;
@@ -76,6 +77,20 @@ public class CoursePublishController {
         log.info("课程发布：{}", courseId);
         Long companyId = 1232141425L;
         coursePublishService.publishCourse(companyId, courseId);
+    }
+
+
+    /**
+     * 查询课程发布信息
+     * @param courseId
+     * @return
+     */
+    @ApiOperation("查询课程发布信息")
+    @ResponseBody
+    @GetMapping("/r/coursepublish/{courseId}")
+    public CoursePublish getCoursepublish(@PathVariable("courseId") Long courseId) {
+        CoursePublish coursePublish = coursePublishService.getCoursePublish(courseId);
+        return coursePublish;
     }
 
 }

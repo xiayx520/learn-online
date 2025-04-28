@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -61,7 +62,7 @@ public class XcChooseCourse implements Serializable {
      */
     private Integer validDays;
 
-    private Float coursePrice;
+    private BigDecimal coursePrice;
 
     /**
      * 选课状态

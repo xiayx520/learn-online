@@ -21,6 +21,7 @@
         <module>learn-online-auth</module>
         <module>learn-online-checkcode</module>
         <module>learn-online-learning</module>
+        <module>learn-online-orders</module>
 
 
     </modules>

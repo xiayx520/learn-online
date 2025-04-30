@@ -1,4 +1,4 @@
-package com.xia.orders.model.dto;
+package com.xia.orders.model.vo;
 
 import com.xia.orders.model.po.XcPayRecord;
 import lombok.Data;
@@ -12,7 +12,7 @@ import lombok.ToString;
  */
 @Data
 @ToString
-public class PayRecordDto extends XcPayRecord {
+public class PayRecordVO extends XcPayRecord {
 
     //二维码
     private String qrcode;

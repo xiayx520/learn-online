@@ -23,10 +23,10 @@ public class WxLoginController {
         //请求微信申请令牌，拿到令牌查询用户信息，将用户信息写入本项目数据库
         XcUser xcUser = wxAuthService.wxAuth(code);
         if (xcUser == null) {
-            return "redirect:http://localhost/error.html";
+            return "redirect:http://www.51xuecheng.cn/error.html";
         }
         String username = xcUser.getUsername();
-        return "redirect:http://localhost/sign.html?username=" + username + "&authType=wx";
+        return "redirect:http://www.51xuecheng.cn/sign.html?username=" + username + "&authType=wx";
     }
 
 

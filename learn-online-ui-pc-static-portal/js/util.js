@@ -7,11 +7,11 @@
 }
 function setCookie(name,value,Days){
     if(Days==0){
-        document.cookie = name + "="+ escape (value) + ";domain=localhost;expires=0;path=/" ;
+        document.cookie = name + "="+ escape (value) + ";domain=51xuecheng.cn;expires=0;path=/" ;
     }else{
         var exp = new Date();
         exp.setTime(exp.getTime() + Days*24*60*60*1000);
-        document.cookie = name + "="+ escape (value) + ";domain=localhost;expires=" + exp.toGMTString()+";path=/";
+        document.cookie = name + "="+ escape (value) + ";domain=51xuecheng.cn;expires=" + exp.toGMTString()+";path=/";
     }
    
     
@@ -156,5 +156,5 @@ function uuid() {
 }
 
 function showlogin(){
-    window.location = "http://localhost/sign.html?returnUrl="+ Base64.encode(window.location)
+    window.location = "http://www.51xuecheng.cn/sign.html?returnUrl="+ Base64.encode(window.location)
 }

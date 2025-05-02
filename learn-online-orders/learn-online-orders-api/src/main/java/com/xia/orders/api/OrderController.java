@@ -60,4 +60,19 @@ public class OrderController {
         orderService.requestpay(payNo, httpResponse);
     }
 
+
+    /**
+     * 查询支付结果
+     * @param payNo
+     * @return
+     */
+    @ApiOperation("查询支付结果")
+    @GetMapping("/payresult")
+    public PayRecordVO payresult(String payNo) {
+
+        log.info("查询支付结果，参数：{}",payNo);
+
+        return orderService.queryPayResult(payNo);
+    }
+
 }

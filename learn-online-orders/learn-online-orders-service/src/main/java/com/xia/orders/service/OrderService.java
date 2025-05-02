@@ -2,6 +2,7 @@ package com.xia.orders.service;
 
 import com.alipay.api.AlipayApiException;
 import com.xia.orders.model.dto.AddOrderDto;
+import com.xia.orders.model.dto.PayStatusDto;
 import com.xia.orders.model.vo.PayRecordVO;
 
 import javax.servlet.http.HttpServletResponse;
@@ -23,4 +24,18 @@ public interface OrderService {
      * @param httpResponse
      */
     void requestpay(String payNo, HttpServletResponse httpResponse) throws AlipayApiException, IOException;
+
+    /**
+     * 查询支付结果
+     * @param payNo
+     * @return
+     */
+    PayRecordVO queryPayResult(String payNo);
+
+
+    /**
+     * 保存支付宝支付结果
+     * @param payStatusDto
+     */
+    void saveAliPayStatus(PayStatusDto payStatusDto);
 }

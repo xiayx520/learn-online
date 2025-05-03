@@ -142,7 +142,7 @@ public class XcChooseCourseServiceImpl implements XcChooseCourseService {
      * @param xcChooseCourse
      * @return
      */
-    private XcCourseTables addCourseTabls(XcChooseCourse xcChooseCourse) {
+    public XcCourseTables addCourseTabls(XcChooseCourse xcChooseCourse) {
         //选课记录完成且未过期可以添加课程到课程表
         String status = xcChooseCourse.getStatus();
         if (!"701001".equals(status)) {

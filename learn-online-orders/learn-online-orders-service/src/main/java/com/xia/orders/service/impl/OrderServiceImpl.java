@@ -13,7 +13,10 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.xia.base.exception.GlobalException;
 import com.xia.base.utils.IdWorkerUtils;
 import com.xia.base.utils.QRCodeUtil;
+import com.xia.messagesdk.model.po.MqMessage;
+import com.xia.messagesdk.service.MqMessageService;
 import com.xia.orders.config.AlipayConfig;
+import com.xia.orders.config.PayNotifyConfig;
 import com.xia.orders.mapper.XcOrdersGoodsMapper;
 import com.xia.orders.mapper.XcOrdersMapper;
 import com.xia.orders.mapper.XcPayRecordMapper;
@@ -25,6 +28,11 @@ import com.xia.orders.model.po.XcPayRecord;
 import com.xia.orders.model.vo.PayRecordVO;
 import com.xia.orders.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageBuilder;
+import org.springframework.amqp.core.MessageDeliveryMode;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,6 +44,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -71,6 +80,12 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private OrderService currentProxy;
+
+    @Autowired
+    private MqMessageService mqMessageService;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     /**
      * 生成订单
@@ -150,6 +165,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 查询支付结果
+     *
      * @param payNo
      * @return
      */
@@ -195,8 +211,6 @@ public class OrderServiceImpl implements OrderService {
         String trade_status = payStatusDto.getTrade_status();
         log.debug("收到支付结果:{},支付记录:{}}", payStatusDto.toString(), payRecordDB.toString());
         if (trade_status.equals("TRADE_SUCCESS")) {
-
-            //支付金额变为分
             //该支付记录对应的金额
             BigDecimal totalPrice = BigDecimal.valueOf(payRecordDB.getTotalPrice());
             //实际支付金额
@@ -237,19 +251,24 @@ public class OrderServiceImpl implements OrderService {
                 log.info("更新订单表状态失败,订单号:{}", orderId);
                 throw new GlobalException("更新订单表状态失败");
             }
+            //保存消息记录,参数1：支付结果通知类型，2: 业务id，3:业务类型
+            MqMessage mqMessage = mqMessageService.addMessage("payresult_notify", orders.getOutBusinessId(), orders.getOrderType(), null);
+            //通知消息
+            notifyPayResult(mqMessage);
         }
     }
 
     /**
      * 支付结果通知
+     *
      * @param request
      * @param response
      */
     @Override
     public void receivenotify(HttpServletRequest request, HttpServletResponse response) throws AlipayApiException, UnsupportedEncodingException {
-        Map<String,String> params = new HashMap<String,String>();
+        Map<String, String> params = new HashMap<String, String>();
         Map requestParams = request.getParameterMap();
-        for (Iterator iter = requestParams.keySet().iterator(); iter.hasNext();) {
+        for (Iterator iter = requestParams.keySet().iterator(); iter.hasNext(); ) {
             String name = (String) iter.next();
             String[] values = (String[]) requestParams.get(name);
             String valueStr = "";
@@ -262,18 +281,18 @@ public class OrderServiceImpl implements OrderService {
         //验签
         boolean verify_result = AlipaySignature.rsaCheckV1(params, ALIPAY_PUBLIC_KEY, AlipayConfig.CHARSET, "RSA2");
 
-        if(verify_result) {//验证成功
+        if (verify_result) {//验证成功
 
             //商户订单号
-            String out_trade_no = new String(request.getParameter("out_trade_no").getBytes("ISO-8859-1"),"UTF-8");
+            String out_trade_no = new String(request.getParameter("out_trade_no").getBytes("ISO-8859-1"), "UTF-8");
             //支付宝交易号
-            String trade_no = new String(request.getParameter("trade_no").getBytes("ISO-8859-1"),"UTF-8");
+            String trade_no = new String(request.getParameter("trade_no").getBytes("ISO-8859-1"), "UTF-8");
             //交易状态
-            String trade_status = new String(request.getParameter("trade_status").getBytes("ISO-8859-1"),"UTF-8");
+            String trade_status = new String(request.getParameter("trade_status").getBytes("ISO-8859-1"), "UTF-8");
             //appid
-            String app_id = new String(request.getParameter("app_id").getBytes("ISO-8859-1"),"UTF-8");
+            String app_id = new String(request.getParameter("app_id").getBytes("ISO-8859-1"), "UTF-8");
             //total_amount
-            String total_amount = new String(request.getParameter("total_amount").getBytes("ISO-8859-1"),"UTF-8");
+            String total_amount = new String(request.getParameter("total_amount").getBytes("ISO-8859-1"), "UTF-8");
 
             //交易成功处理
             if (trade_status.equals("TRADE_SUCCESS")) {
@@ -292,7 +311,42 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
+     * 支付结果通知
+     *
+     * @param message
+     */
+    @Override
+    public void notifyPayResult(MqMessage message) {
+        //1、消息体，转json
+        String msg = JSON.toJSONString(message);
+        //设置消息持久化
+        Message msgObj = MessageBuilder.withBody(msg.getBytes(StandardCharsets.UTF_8))
+                .setDeliveryMode(MessageDeliveryMode.PERSISTENT)
+                .build();
+        // 2.全局唯一的消息ID，需要封装到CorrelationData中
+        CorrelationData correlationData = new CorrelationData(message.getId().toString());
+        // 3.添加callback
+        correlationData.getFuture().addCallback(
+                result -> {
+                    if (result != null && result.isAck()) {
+                        // 3.1.ack，消息成功
+                        log.debug("通知支付结果消息发送成功, ID:{}", correlationData.getId());
+                        //删除消息表中的记录
+                        mqMessageService.completed(message.getId());
+                    } else {
+                        // 3.2.nack，消息失败
+                        log.error("通知支付结果消息发送失败, ID:{}, 原因{}", correlationData.getId(), result.getReason());
+                    }
+                },
+                ex -> log.error("消息发送异常, ID:{}, 原因{}", correlationData.getId(), ex.getMessage())
+        );
+        // 发送消息
+        rabbitTemplate.convertAndSend(PayNotifyConfig.PAYNOTIFY_EXCHANGE_FANOUT, "", msgObj, correlationData);
+    }
+
+    /**
      * 从支付宝查询支付结果
+     *
      * @param payNo
      * @return
      */

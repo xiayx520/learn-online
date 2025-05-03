@@ -1,6 +1,7 @@
 package com.xia.orders.service;
 
 import com.alipay.api.AlipayApiException;
+import com.xia.messagesdk.model.po.MqMessage;
 import com.xia.orders.model.dto.AddOrderDto;
 import com.xia.orders.model.dto.PayStatusDto;
 import com.xia.orders.model.vo.PayRecordVO;
@@ -48,4 +49,11 @@ public interface OrderService {
      * @param response
      */
     void receivenotify(HttpServletRequest request, HttpServletResponse response) throws AlipayApiException, UnsupportedEncodingException;
+
+
+    /**
+     * 发送通知结果
+     * @param message
+     */
+    public void notifyPayResult(MqMessage message);
 }

@@ -9,10 +9,15 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 @RestController
 @Slf4j
@@ -30,7 +35,6 @@ public class OrderController {
      */
     @ApiOperation("生成支付二维码")
     @PostMapping("/generatepaycode")
-    @ResponseBody
     public PayRecordVO generatePayCode(@RequestBody AddOrderDto addOrderDto) {
 
         log.info("生成支付二维码，参数：{}",addOrderDto);
@@ -75,4 +79,18 @@ public class OrderController {
         return orderService.queryPayResult(payNo);
     }
 
+
+    /**
+     * 接收支付结果通知
+     * @param request
+     * @param response
+     * @throws UnsupportedEncodingException
+     * @throws AlipayApiException
+     */
+    @ApiOperation("接收支付结果通知")
+    @PostMapping("/receivenotify")
+    public void receivenotify(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException, AlipayApiException {
+        log.info("接收支付结果通知");
+        orderService.receivenotify(request, response);
+    }
 }

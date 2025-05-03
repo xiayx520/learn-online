@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
+import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.request.AlipayTradeQueryRequest;
 import com.alipay.api.request.AlipayTradeWapPayRequest;
 import com.alipay.api.response.AlipayTradeQueryResponse;
@@ -30,10 +31,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -52,6 +57,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Value("${pay.qrcodeurl}")
     String qrcodeurl;
+
+    @Value("${pay.notifyurl}")
+    String notifyUrl;
 
     @Value("${pay.alipay.APP_ID}")
     String APP_ID;
@@ -120,7 +128,7 @@ public class OrderServiceImpl implements OrderService {
         //获得初始化的AlipayClient
         AlipayTradeWapPayRequest alipayRequest = new AlipayTradeWapPayRequest();//创建API对应的request
 //        alipayRequest.setReturnUrl("http://domain.com/CallBack/return_url.jsp");
-//        alipayRequest.setNotifyUrl("http://domain.com/CallBack/notify_url.jsp");//在公共参数中设置回跳和通知地址
+        alipayRequest.setNotifyUrl(notifyUrl);//在公共参数中设置回跳和通知地址
         alipayRequest.setBizContent("{" +
                 " \"out_trade_no\":\"" + payRecord.getPayNo() + "\"," +
                 " \"total_amount\":\"" + payRecord.getTotalPrice() + "\"," +
@@ -175,6 +183,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public void saveAliPayStatus(PayStatusDto payStatusDto) {
         //支付流水号
         String payNo = payStatusDto.getOut_trade_no();
@@ -227,6 +236,57 @@ public class OrderServiceImpl implements OrderService {
             } else {
                 log.info("更新订单表状态失败,订单号:{}", orderId);
                 throw new GlobalException("更新订单表状态失败");
+            }
+        }
+    }
+
+    /**
+     * 支付结果通知
+     * @param request
+     * @param response
+     */
+    @Override
+    public void receivenotify(HttpServletRequest request, HttpServletResponse response) throws AlipayApiException, UnsupportedEncodingException {
+        Map<String,String> params = new HashMap<String,String>();
+        Map requestParams = request.getParameterMap();
+        for (Iterator iter = requestParams.keySet().iterator(); iter.hasNext();) {
+            String name = (String) iter.next();
+            String[] values = (String[]) requestParams.get(name);
+            String valueStr = "";
+            for (int i = 0; i < values.length; i++) {
+                valueStr = (i == values.length - 1) ? valueStr + values[i]
+                        : valueStr + values[i] + ",";
+            }
+            params.put(name, valueStr);
+        }
+        //验签
+        boolean verify_result = AlipaySignature.rsaCheckV1(params, ALIPAY_PUBLIC_KEY, AlipayConfig.CHARSET, "RSA2");
+
+        if(verify_result) {//验证成功
+
+            //商户订单号
+            String out_trade_no = new String(request.getParameter("out_trade_no").getBytes("ISO-8859-1"),"UTF-8");
+            //支付宝交易号
+            String trade_no = new String(request.getParameter("trade_no").getBytes("ISO-8859-1"),"UTF-8");
+            //交易状态
+            String trade_status = new String(request.getParameter("trade_status").getBytes("ISO-8859-1"),"UTF-8");
+            //appid
+            String app_id = new String(request.getParameter("app_id").getBytes("ISO-8859-1"),"UTF-8");
+            //total_amount
+            String total_amount = new String(request.getParameter("total_amount").getBytes("ISO-8859-1"),"UTF-8");
+
+            //交易成功处理
+            if (trade_status.equals("TRADE_SUCCESS")) {
+
+                PayStatusDto payStatusDto = new PayStatusDto();
+                payStatusDto.setOut_trade_no(out_trade_no);
+                payStatusDto.setTrade_status(trade_status);
+                payStatusDto.setApp_id(app_id);
+                payStatusDto.setTrade_no(trade_no);
+                payStatusDto.setTotal_amount(total_amount);
+
+                //保存支付结果
+                currentProxy.saveAliPayStatus(payStatusDto);
             }
         }
     }

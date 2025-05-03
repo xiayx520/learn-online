@@ -5,8 +5,10 @@ import com.xia.orders.model.dto.AddOrderDto;
 import com.xia.orders.model.dto.PayStatusDto;
 import com.xia.orders.model.vo.PayRecordVO;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 public interface OrderService {
 
@@ -38,4 +40,12 @@ public interface OrderService {
      * @param payStatusDto
      */
     void saveAliPayStatus(PayStatusDto payStatusDto);
+
+
+    /**
+     * 接收支付宝支付结果
+     * @param request
+     * @param response
+     */
+    void receivenotify(HttpServletRequest request, HttpServletResponse response) throws AlipayApiException, UnsupportedEncodingException;
 }

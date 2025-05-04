@@ -1,11 +1,16 @@
 package com.xia.content.api;
 
+import com.alibaba.fastjson.JSON;
 import com.xia.content.model.po.CoursePublish;
+import com.xia.content.model.po.CourseTeacher;
+import com.xia.content.model.vo.CourseBaseInfoVO;
 import com.xia.content.model.vo.CoursePreviewVO;
+import com.xia.content.model.vo.TeachPlanVO;
 import com.xia.content.service.CoursePublishService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +18,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
+
+import java.util.List;
 
 @Controller
 @Slf4j
@@ -93,4 +100,28 @@ public class CoursePublishController {
         return coursePublish;
     }
 
+
+    @ApiOperation("获取课程发布信息")
+    @ResponseBody
+    @GetMapping("/course/whole/{courseId}")
+    public CoursePreviewVO getCoursePublish(@PathVariable("courseId") Long courseId) {
+        //查询课程发布信息
+        CoursePublish coursePublish = coursePublishService.getCoursePublish(courseId);
+        if (coursePublish == null) {
+            return new CoursePreviewVO();
+        }
+
+        //课程基本信息
+        CourseBaseInfoVO courseBase = new CourseBaseInfoVO();
+        BeanUtils.copyProperties(coursePublish, courseBase);
+        //课程计划
+        List<TeachPlanVO> teachplans = JSON.parseArray(coursePublish.getTeachplan(), TeachPlanVO.class);
+        //师资信息
+        List<CourseTeacher> courseTeachers = JSON.parseArray(coursePublish.getTeachers(), CourseTeacher.class);
+        CoursePreviewVO coursePublishInfo = new CoursePreviewVO();
+        coursePublishInfo.setCourseBase(courseBase);
+        coursePublishInfo.setTeachplans(teachplans);
+        coursePublishInfo.setCourseTeacher(courseTeachers);
+        return coursePublishInfo;
+    }
 }

@@ -78,6 +78,8 @@ public class PublishTask extends MessageProcessAbstract {
         log.debug("将课程信息缓存至redis,课程id:{}", courseId);
         try {
             TimeUnit.SECONDS.sleep(2);
+            Long taskId = mqMessage.getId();
+            mqMessageService.completedStageThree(taskId);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -160,11 +162,11 @@ public class PublishTask extends MessageProcessAbstract {
         try {
             Configuration configuration = new Configuration(Configuration.getVersion());
             //加载模板
-            InputStream inputStream = this.getClass().getResourceAsStream("/templates/course_template.ftl");
+            InputStream inputStream = this.getClass().getResourceAsStream("/templates/course_publish_template.ftl");
             if (inputStream == null) {
                 throw new FileNotFoundException("模板文件未找到");
             }
-            Template template = new Template("course_template.ftl",
+            Template template = new Template("course_publish_template.ftl",
                     new InputStreamReader(inputStream, "UTF-8"), configuration);
 
             //准备数据

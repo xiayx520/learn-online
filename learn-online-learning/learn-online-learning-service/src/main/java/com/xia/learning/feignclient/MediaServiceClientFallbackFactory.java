@@ -22,6 +22,8 @@ public class MediaServiceClientFallbackFactory implements FallbackFactory<MediaS
                 log.error("远程调用媒资管理服务熔断异常：{}", throwable.getMessage());
                 return null;
             }
+
+
         };
     }
 }

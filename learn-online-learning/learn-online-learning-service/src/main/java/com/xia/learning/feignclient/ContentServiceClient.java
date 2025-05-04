@@ -19,4 +19,8 @@ public interface ContentServiceClient {
     @GetMapping("/content/r/coursepublish/{courseId}")
     public CoursePublish getCoursepublish(@PathVariable("courseId") Long courseId);
 
+
+
+    @GetMapping("/content/teachplan/isPreview/{teachPlanId}")
+    public Boolean isPreview(@PathVariable("teachPlanId") Long teachPlanId);
 }

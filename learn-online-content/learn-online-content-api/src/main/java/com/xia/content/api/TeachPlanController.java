@@ -88,5 +88,16 @@ public class TeachPlanController {
         teachPlanService.deleteTeachPlanMedia(teachPlanId, mediaId);
     }
 
+    /**
+     * 判断该课程计划是否支持试看
+     * @param teachPlanId
+     * @return
+     */
+    @ApiOperation("判断该课程计划是否支持试看")
+    @GetMapping("/teachplan/isPreview/{teachPlanId}")
+    public Boolean isPreview(@PathVariable("teachPlanId") Long teachPlanId) {
+        return teachPlanService.isPreview(teachPlanId);
+    }
+
 }
 

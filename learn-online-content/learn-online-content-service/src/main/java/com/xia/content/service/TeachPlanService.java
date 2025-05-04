@@ -49,4 +49,11 @@ public interface TeachPlanService {
      * @param mediaId
      */
     void deleteTeachPlanMedia(Long teachPlanId, String mediaId);
+
+    /**
+     * 判断是否可以预览
+     * @param teachPlanId
+     * @return
+     */
+    Boolean isPreview(Long teachPlanId);
 }

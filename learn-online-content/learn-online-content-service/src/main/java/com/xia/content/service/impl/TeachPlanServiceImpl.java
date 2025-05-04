@@ -200,6 +200,25 @@ public class TeachPlanServiceImpl implements TeachPlanService {
                 .eq(TeachplanMedia::getMediaId, mediaId));
     }
 
+    /**
+     * 判断是否为预览
+     * @param teachPlanId
+     * @return
+     */
+    @Override
+    public Boolean isPreview(Long teachPlanId) {
+        if (teachPlanId == null) {
+            throw new GlobalException("教学计划id为空");
+        }
+        Teachplan teachplan = teachplanMapper.selectById(teachPlanId);
+        if (teachplan == null) {
+            throw new GlobalException("教学计划不存在");
+        }
+        String isPreview = teachplan.getIsPreview();
+
+        return "1".equals(isPreview);
+    }
+
     private int getTeachplanCount(Long courseId, Long parentId) {
         LambdaQueryWrapper<Teachplan> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Teachplan::getCourseId, courseId)

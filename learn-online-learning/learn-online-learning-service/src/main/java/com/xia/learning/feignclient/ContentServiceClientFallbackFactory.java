@@ -23,6 +23,12 @@ public class ContentServiceClientFallbackFactory implements FallbackFactory<Cont
                 log.error("调用内容管理服务发生熔断:{}", throwable.toString(),throwable);
                 return null;
             }
+
+            @Override
+            public Boolean isPreview(Long teachPlanId) {
+                log.error("调用内容管理服务熔断异常：{}", throwable.getMessage());
+                return false;
+            }
         };
     }
 }

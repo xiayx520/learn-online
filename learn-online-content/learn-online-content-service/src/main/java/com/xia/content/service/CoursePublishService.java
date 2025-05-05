@@ -31,4 +31,10 @@ public interface CoursePublishService {
      * @return
      */
     CoursePublish getCoursePublish(Long courseId);
+
+    /**
+     * 课程下线
+     * @param courseId
+     */
+    void offline(Long courseId);
 }

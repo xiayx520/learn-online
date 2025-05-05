@@ -124,4 +124,13 @@ public class CoursePublishController {
         coursePublishInfo.setCourseTeacher(courseTeachers);
         return coursePublishInfo;
     }
+
+    @ApiOperation("下架课程已发布的课程")
+    @ResponseBody
+    @GetMapping("/courseoffline/{courseId}")
+    public void offline(@PathVariable("courseId") Long courseId) {
+        log.info("下架课程已发布的课程：{}", courseId);
+        coursePublishService.offline(courseId);
+    }
+
 }

@@ -17,6 +17,7 @@ import com.xia.media.model.po.MediaProcess;
 import com.xia.media.model.vo.UploadFileResultVO;
 import com.xia.media.service.MediaFileService;
 import io.minio.MinioClient;
+import io.minio.RemoveObjectArgs;
 import io.minio.UploadObjectArgs;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -69,7 +70,8 @@ public class MediaFileServiceImpl implements MediaFileService {
         LambdaQueryWrapper<MediaFiles> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.like(StringUtils.isNotEmpty(queryMediaParamsDto.getFilename()), MediaFiles::getFilename, queryMediaParamsDto.getFilename())
                 .eq(StringUtils.isNotEmpty(queryMediaParamsDto.getFileType()), MediaFiles::getFileType, queryMediaParamsDto.getFileType())
-                .eq(StringUtils.isNotEmpty(queryMediaParamsDto.getAuditStatus()), MediaFiles::getAuditStatus, queryMediaParamsDto.getAuditStatus());
+                .eq(StringUtils.isNotEmpty(queryMediaParamsDto.getAuditStatus()), MediaFiles::getAuditStatus, queryMediaParamsDto.getAuditStatus())
+                .eq(MediaFiles::getStatus, "1"  );//状态：1正常
         //分页对象
         Page<MediaFiles> page = new Page<>(pageParams.getPageNo(), pageParams.getPageSize());
         // 查询数据内容获得结果
@@ -232,5 +234,40 @@ public class MediaFileServiceImpl implements MediaFileService {
         }
 
         return RestResponse.success(url);
+    }
+
+    /**
+     * 删除文件
+     * @param fileId
+     * @return
+     */
+    @Override
+    public void deleteFile(String fileId) {
+        if (StringUtils.isBlank(fileId)) {
+            throw new GlobalException("文件id为空");
+        }
+        MediaFiles mediaFiles = mediaFilesMapper.selectById(fileId);
+        if (mediaFiles == null) {
+            throw new GlobalException("文件不存在");
+        }
+        //从minio删除文件
+        try {
+            minioClient.removeObject(
+                    RemoveObjectArgs.builder()
+                            .bucket(mediaFiles.getBucket())
+                            .object(mediaFiles.getFilePath())
+                            .build()
+            );
+            log.info("删除文件成功,bucket:{},objectName:{}", mediaFiles.getBucket(), mediaFiles.getFilePath());
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("删除文件出错,bucket:{},objectName:{},错误原因:{}", mediaFiles.getBucket(), mediaFiles.getFilePath(), e.getMessage(), e);
+            throw new GlobalException("删除文件失败");
+        }
+        //从数据库删除文件记录
+        int delete = mediaFilesMapper.deleteById(fileId);
+        if (delete < 1) {
+            throw new GlobalException("删除文件记录失败");
+        }
     }
 }

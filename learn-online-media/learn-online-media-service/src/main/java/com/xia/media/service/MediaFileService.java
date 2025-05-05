@@ -65,4 +65,12 @@ public interface MediaFileService {
      * @return
      */
     RestResponse<String> getPlayUrl(String mediaId);
+
+
+   /**
+    * @description 根据文件id删除文件
+    * @param fileId
+    * @return
+    */
+   void deleteFile(String fileId);
 }

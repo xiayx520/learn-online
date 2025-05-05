@@ -58,10 +58,21 @@ public class MyCourseTablesController {
 
     }
 
+    /**
+     * 我的课程表
+     * @param params
+     * @return
+     */
     @ApiOperation("我的课程表")
     @GetMapping("/mycoursetable")
     public PageResult<XcCourseTables> mycoursetable(MyCourseTableParams params) {
-        return null;
+        log.info("查询我的课程表:{}", params);
+        SecurityUtil.XcUser user = SecurityUtil.getUser();
+        if (user == null) {
+            throw new RuntimeException("请登录后继续查询我的课程表");
+        }
+        params.setUserId(user.getId());
+        return xcChooseCourseService.mycoursetable(params);
     }
 
 }

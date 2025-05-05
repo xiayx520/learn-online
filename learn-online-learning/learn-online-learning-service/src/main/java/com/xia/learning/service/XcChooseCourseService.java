@@ -1,5 +1,7 @@
 package com.xia.learning.service;
 
+import com.xia.base.model.PageResult;
+import com.xia.learning.model.dto.MyCourseTableParams;
 import com.xia.learning.model.po.XcChooseCourse;
 import com.xia.learning.model.po.XcCourseTables;
 import com.xia.learning.model.vo.XcChooseCourseVO;
@@ -30,4 +32,11 @@ public interface XcChooseCourseService {
      * @return
      */
     XcCourseTables addCourseTabls(XcChooseCourse xcChooseCourse);
+
+    /**
+     * 我的课程表
+     * @param params
+     * @return
+     */
+    PageResult<XcCourseTables> mycoursetable(MyCourseTableParams params);
 }

@@ -7,7 +7,7 @@ export async function getOrderPageList(
   body: any
 ): Promise<IOrderPageVO> {
   const { data } = await createAPI(
-    '/order/orders/org-list',
+    '/orders/order/org-list',
     'post',
     params,
     body

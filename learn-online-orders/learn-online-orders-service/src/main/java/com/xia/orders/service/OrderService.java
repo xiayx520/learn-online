@@ -1,9 +1,13 @@
 package com.xia.orders.service;
 
 import com.alipay.api.AlipayApiException;
+import com.xia.base.model.PageParams;
+import com.xia.base.model.PageResult;
 import com.xia.messagesdk.model.po.MqMessage;
 import com.xia.orders.model.dto.AddOrderDto;
+import com.xia.orders.model.dto.OrderQueryDto;
 import com.xia.orders.model.dto.PayStatusDto;
+import com.xia.orders.model.vo.OrderVO;
 import com.xia.orders.model.vo.PayRecordVO;
 
 import javax.servlet.http.HttpServletRequest;
@@ -56,4 +60,12 @@ public interface OrderService {
      * @param message
      */
     public void notifyPayResult(MqMessage message);
+
+    /**
+     * 查询订单列表
+     * @param pageParams
+     * @param orderQueryDto
+     * @return
+     */
+    PageResult<OrderVO> list(PageParams pageParams, OrderQueryDto orderQueryDto);
 }

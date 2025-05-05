@@ -1,7 +1,11 @@
 package com.xia.orders.api;
 
 import com.alipay.api.AlipayApiException;
+import com.xia.base.model.PageParams;
+import com.xia.base.model.PageResult;
 import com.xia.orders.model.dto.AddOrderDto;
+import com.xia.orders.model.dto.OrderQueryDto;
+import com.xia.orders.model.vo.OrderVO;
 import com.xia.orders.model.vo.PayRecordVO;
 import com.xia.orders.service.OrderService;
 import com.xia.orders.util.SecurityUtil;
@@ -92,5 +96,15 @@ public class OrderController {
     public void receivenotify(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException, AlipayApiException {
         log.info("接收支付结果通知");
         orderService.receivenotify(request, response);
+    }
+
+    /**
+     * 查询订单明细列表
+     */
+    @ApiOperation("查询订单明细列表")
+    @PostMapping("/order/org-list")
+    public PageResult<OrderVO> list(PageParams pageParams, @RequestBody OrderQueryDto orderQueryDto){
+        log.info("查询订单明细列表，参数：{}",orderQueryDto);
+        return orderService.list(pageParams, orderQueryDto);
     }
 }

@@ -10,7 +10,10 @@ import com.alipay.api.request.AlipayTradeQueryRequest;
 import com.alipay.api.request.AlipayTradeWapPayRequest;
 import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xia.base.exception.GlobalException;
+import com.xia.base.model.PageParams;
+import com.xia.base.model.PageResult;
 import com.xia.base.utils.IdWorkerUtils;
 import com.xia.base.utils.QRCodeUtil;
 import com.xia.messagesdk.model.po.MqMessage;
@@ -21,13 +24,16 @@ import com.xia.orders.mapper.XcOrdersGoodsMapper;
 import com.xia.orders.mapper.XcOrdersMapper;
 import com.xia.orders.mapper.XcPayRecordMapper;
 import com.xia.orders.model.dto.AddOrderDto;
+import com.xia.orders.model.dto.OrderQueryDto;
 import com.xia.orders.model.dto.PayStatusDto;
 import com.xia.orders.model.po.XcOrders;
 import com.xia.orders.model.po.XcOrdersGoods;
 import com.xia.orders.model.po.XcPayRecord;
+import com.xia.orders.model.vo.OrderVO;
 import com.xia.orders.model.vo.PayRecordVO;
 import com.xia.orders.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.core.MessageDeliveryMode;
@@ -50,6 +56,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -342,6 +349,41 @@ public class OrderServiceImpl implements OrderService {
         );
         // 发送消息
         rabbitTemplate.convertAndSend(PayNotifyConfig.PAYNOTIFY_EXCHANGE_FANOUT, "", msgObj, correlationData);
+    }
+
+    /**
+     * 查询支付结果
+     * @param pageParams
+     * @param orderQueryDto
+     * @return
+     */
+    @Override
+    public PageResult<OrderVO> list(PageParams pageParams, OrderQueryDto orderQueryDto) {
+        Page<XcOrders> page = new Page<>(pageParams.getPageNo(), pageParams.getPageSize());
+        //查询订单列表
+        Page<XcOrders> pageResult = ordersMapper.selectPage(page, new LambdaQueryWrapper<XcOrders>()
+                // 模糊匹配课程名称（仅当 courseName 非空时生效）
+                .like(StringUtils.isNotBlank(orderQueryDto.getCourseName()), XcOrders::getOrderName, orderQueryDto.getCourseName())
+                // 精确匹配用户ID（仅当 userId 非空时生效）
+                .eq(StringUtils.isNotBlank(orderQueryDto.getUserId()), XcOrders::getUserId, orderQueryDto.getUserId())
+                // 精确匹配订单状态（仅当 status 非空时生效）
+                .eq(StringUtils.isNotBlank(orderQueryDto.getStatus()), XcOrders::getStatus, orderQueryDto.getStatus())
+                // 精确匹配订单编号（仅当 orderNo 非空时生效）
+                .eq(StringUtils.isNotBlank(orderQueryDto.getOrderNo()), XcOrders::getId, orderQueryDto.getOrderNo())
+                // 创建时间大于等于 orderStart（仅当 orderStart 非空时生效）
+                .ge(null != orderQueryDto.getOrderStart(), XcOrders::getCreateDate, orderQueryDto.getOrderStart())
+                // 创建时间小于等于 orderEnd（仅当 orderEnd 非空时生效）
+                .le(null != orderQueryDto.getOrderEnd(), XcOrders::getCreateDate, orderQueryDto.getOrderEnd()));
+
+        List<OrderVO> orderVOList = pageResult.getRecords().stream().map(orders -> {
+            OrderVO orderVO = new OrderVO();
+            BeanUtils.copyProperties(orders, orderVO);
+            orderVO.setCoursePubName(orders.getOrderName());
+            orderVO.setPrice(BigDecimal.valueOf(orders.getTotalPrice()));
+            orderVO.setOrderNo(orders.getId());
+            return orderVO;
+        }).collect(Collectors.toList());
+        return new PageResult<>(orderVOList, pageResult.getTotal(), pageResult.getPages(), pageResult.getSize());
     }
 
     /**

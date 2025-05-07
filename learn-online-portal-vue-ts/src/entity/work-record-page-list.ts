@@ -75,55 +75,25 @@ export interface ICourseWorkDTO {
  */
 export interface IWorkRecOverallDTO {
   /**
-   * 答题总数[作业数]
+   * 作业ID
    */
-  answerNumber?: number
+  workId?: number
   /**
-   * 最后提交时间
+   * 作业标题
    */
-  commitedTime?: string
+  workTitle?: string
   /**
-   * 提交作业总人数
+   * 提交总数
    */
-  committerNumber?: number
+  totalSubmissions?: number
   /**
-   * 机构ID
+   * 待批改数
    */
-  companyId?: number
+  pendingReviews?: number
   /**
-   * 机构名称
+   * 按课程计划分组的提交记录
    */
-  companyName?: string
-  /**
-   * 课程名称
-   */
-  courseName?: string
-  /**
-   * 课程发布ID
-   */
-  coursePubId?: number
-  courseWorkId?: number
-  /**
-   * 课程学习总人数
-   */
-  learnerNumber?: number
   recGroupDTOList?: IWorkRecGroupDTO[]
-  /**
-   * 最后批阅时间
-   */
-  reviewedTime?: string
-  /**
-   * 待批阅数
-   */
-  tobeReviewed?: number
-  /**
-   * 答题总人数
-   */
-  totalUsers?: number
-  /**
-   * 作业总数
-   */
-  workNumber?: number
 }
 
 /**
@@ -150,9 +120,17 @@ export interface IWorkRecGroupDTO {
  */
 export interface IWorkRecordDTO {
   /**
+   * 记录ID
+   */
+  id?: number
+  /**
    * 完成内容
    */
   answer?: string
+  /**
+   * 提交内容
+   */
+  submitContent?: string
   /**
    * 评语
    */
@@ -201,4 +179,12 @@ export interface IWorkRecordDTO {
    * 作业记录Id
    */
   workRecordId?: number
+  /**
+   * 成绩
+   */
+  grade?: number
+  /**
+   * 修改时间
+   */
+  changeDate?: string
 }

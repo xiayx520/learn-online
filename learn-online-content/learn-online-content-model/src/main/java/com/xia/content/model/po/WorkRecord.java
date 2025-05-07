@@ -28,7 +28,15 @@ public class WorkRecord {
     private Long userId;
 
     /**
-     * 作业状态：pending-待完成，submitted-已提交，graded-已评分
+     * 课程计划ID
+     */
+    private Long teachplanId;
+
+    /**
+     * 作业状态：
+     * pending - 待完成
+     * submitted - 已提交
+     * graded - 已评分
      */
     private String status;
 

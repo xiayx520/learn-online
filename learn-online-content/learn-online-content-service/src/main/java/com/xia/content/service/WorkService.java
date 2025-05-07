@@ -8,6 +8,7 @@ import com.xia.content.model.dto.WorkInfoDto;
 import com.xia.content.model.dto.WorkSubmitDTO;
 import com.xia.content.model.po.WorkInfo;
 import com.xia.content.model.po.WorkRecord;
+import com.xia.content.model.dto.IWorkRecOverallDTO;
 
 public interface WorkService {
 
@@ -78,4 +79,11 @@ public interface WorkService {
      * @param workId 作业ID
      */
     void unarchiveWork(Long workId);
+
+    /**
+     * 获取作业批改详情
+     * @param workId 作业ID
+     * @return 作业批改详情
+     */
+    IWorkRecOverallDTO getWorkRecordReadOverAll(Long workId);
 }

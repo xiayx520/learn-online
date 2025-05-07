@@ -5,16 +5,16 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xia.base.exception.GlobalException;
 import com.xia.base.model.PageParams;
 import com.xia.base.model.PageResult;
+import com.xia.content.mapper.TeachplanMapper;
 import com.xia.content.mapper.WorkGradeMapper;
 import com.xia.content.mapper.WorkMapper;
 import com.xia.content.mapper.WorkRecordMapper;
-import com.xia.content.model.dto.QueryWorkRecordParamsDto;
-import com.xia.content.model.dto.WorkGradeDTO;
-import com.xia.content.model.dto.WorkInfoDto;
-import com.xia.content.model.dto.WorkSubmitDTO;
+import com.xia.content.model.dto.*;
+import com.xia.content.model.po.Teachplan;
 import com.xia.content.model.po.WorkGrade;
 import com.xia.content.model.po.WorkInfo;
 import com.xia.content.model.po.WorkRecord;
+import com.xia.content.model.vo.WorkRecordVO;
 import com.xia.content.service.WorkService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -24,7 +24,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -40,10 +42,18 @@ public class WorkServiceImpl implements WorkService {
     @Autowired
     private WorkGradeMapper workGradeMapper;
 
+    @Autowired
+    private TeachplanMapper teachplanMapper;
+
     // 作业状态常量
     private static final String STATUS_DRAFT = "draft";
     private static final String STATUS_PUBLISHED = "published";
     private static final String STATUS_ARCHIVED = "archived";
+
+    // 作业提交记录状态常量
+    private static final String RECORD_STATUS_PENDING = "pending";
+    private static final String RECORD_STATUS_SUBMITTED = "submitted";
+    private static final String RECORD_STATUS_GRADED = "graded";
 
     @Override
     @Transactional
@@ -147,7 +157,7 @@ public class WorkServiceImpl implements WorkService {
         if (workInfo == null) {
             throw new GlobalException("作业不存在");
         }
-        if (!"published".equals(workInfo.getStatus())) {
+        if (!STATUS_PUBLISHED.equals(workInfo.getStatus())) {
             throw new GlobalException("作业未发布，不能提交");
         }
 
@@ -166,7 +176,7 @@ public class WorkServiceImpl implements WorkService {
             workRecord = existRecord;
             workRecord.setSubmitContent(workSubmitDTO.getContent());
             workRecord.setSubmitDate(LocalDateTime.now());
-            workRecord.setStatus("submitted");
+            workRecord.setStatus(RECORD_STATUS_SUBMITTED);
             workRecord.setChangeDate(LocalDateTime.now());
             workRecordMapper.updateById(workRecord);
         } else {
@@ -175,7 +185,7 @@ public class WorkServiceImpl implements WorkService {
             workRecord.setWorkId(workSubmitDTO.getWorkId());
             workRecord.setUserId(userId);
             workRecord.setSubmitContent(workSubmitDTO.getContent());
-            workRecord.setStatus("submitted");
+            workRecord.setStatus(RECORD_STATUS_SUBMITTED);
             workRecord.setSubmitDate(LocalDateTime.now());
             workRecord.setCreateDate(LocalDateTime.now());
             workRecord.setChangeDate(LocalDateTime.now());
@@ -211,26 +221,46 @@ public class WorkServiceImpl implements WorkService {
             throw new GlobalException("作业记录不存在");
         }
 
-        // 2. 校验作业状态是否为已提交
-        if (!"submitted".equals(workRecord.getStatus())) {
-            throw new GlobalException("只能对已提交的作业进行评分");
+        // 2. 校验作业状态是否为已提交或已评分
+        if (!RECORD_STATUS_SUBMITTED.equals(workRecord.getStatus()) 
+            && !RECORD_STATUS_GRADED.equals(workRecord.getStatus())) {
+            throw new GlobalException("只能对已提交或已评分的作业进行评分");
         }
 
-        // 3. 创建评分记录
-        WorkGrade workGrade = new WorkGrade();
-        BeanUtils.copyProperties(workGradeDTO, workGrade);
-        workGrade.setCreateDate(LocalDateTime.now());
-        workGrade.setChangeDate(LocalDateTime.now());
-        // TODO: 设置评分人ID，需要从当前登录用户中获取
-        workGrade.setGraderId(1L);
+        // 3. 查询是否存在评分记录
+        LambdaQueryWrapper<WorkGrade> queryWrapper = new LambdaQueryWrapper<WorkGrade>()
+                .eq(WorkGrade::getWorkRecordId, workGradeDTO.getWorkRecordId())
+                .orderByDesc(WorkGrade::getCreateDate)
+                .last("LIMIT 1");
+        WorkGrade existingGrade = workGradeMapper.selectOne(queryWrapper);
 
-        // 4. 保存评分记录
-        workGradeMapper.insert(workGrade);
+        // 4. 处理评分记录
+        WorkGrade workGrade;
+        if (existingGrade != null) {
+            // 更新现有评分记录
+            workGrade = existingGrade;
+            workGrade.setGrade(workGradeDTO.getGrade());
+            workGrade.setFeedback(workGradeDTO.getFeedback());
+            workGrade.setChangeDate(LocalDateTime.now());
+            workGradeMapper.updateById(workGrade);
+        } else {
+            // 创建新的评分记录
+            workGrade = new WorkGrade();
+            BeanUtils.copyProperties(workGradeDTO, workGrade);
+            workGrade.setCreateDate(LocalDateTime.now());
+            workGrade.setChangeDate(LocalDateTime.now());
+            // TODO: 设置评分人ID，需要从当前登录用户中获取
+            workGrade.setGraderId(1L);
+            workGradeMapper.insert(workGrade);
+        }
 
         // 5. 更新作业记录状态为已评分
-        workRecord.setStatus("graded");
+        workRecord.setStatus(RECORD_STATUS_GRADED);
         workRecord.setChangeDate(LocalDateTime.now());
-        workRecordMapper.updateById(workRecord);
+        int updated = workRecordMapper.updateById(workRecord);
+        if (updated <= 0) {
+            throw new GlobalException("更新作业记录状态失败");
+        }
 
         log.info("作业评分完成，作业记录ID：{}，分数：{}", workGradeDTO.getWorkRecordId(), workGradeDTO.getGrade());
     }
@@ -305,5 +335,79 @@ public class WorkServiceImpl implements WorkService {
         if (update <= 0) {
             throw new GlobalException("取消归档失败");
         }
+    }
+
+    @Override
+    public IWorkRecOverallDTO getWorkRecordReadOverAll(Long workId) {
+        // 1. 获取作业信息
+        WorkInfo workInfo = workMapper.selectById(workId);
+        if (workInfo == null) {
+            throw new GlobalException("作业不存在");
+        }
+
+        // 2. 获取作业提交记录
+        LambdaQueryWrapper<WorkRecord> queryWrapper = new LambdaQueryWrapper<WorkRecord>()
+                .eq(WorkRecord::getWorkId, workId)
+                .orderByDesc(WorkRecord::getSubmitDate);
+        List<WorkRecord> records = workRecordMapper.selectList(queryWrapper);
+
+        // 3. 统计信息
+        long totalSubmissions = records.size();
+        long pendingReviews = records.stream()
+                .filter(record -> "submitted".equals(record.getStatus()))
+                .count();
+
+        // 4. 构建返回对象
+        IWorkRecOverallDTO result = new IWorkRecOverallDTO();
+        result.setWorkId(workId);
+        result.setWorkTitle(workInfo.getTitle());
+        result.setTotalSubmissions((int) totalSubmissions);
+        result.setPendingReviews((int) pendingReviews);
+        
+        // 5. 按课程计划分组
+        Map<Long, List<WorkRecord>> groupedRecords = records.stream()
+                .collect(Collectors.groupingBy(WorkRecord::getTeachplanId));
+        
+        // 6. 构建课程计划分组列表
+        List<IWorkRecGroupDTO> groups = new ArrayList<>();
+        for (Map.Entry<Long, List<WorkRecord>> entry : groupedRecords.entrySet()) {
+            IWorkRecGroupDTO group = new IWorkRecGroupDTO();
+            group.setTeachplanId(entry.getKey());
+            
+            // 获取课程计划名称
+            Teachplan teachplan = teachplanMapper.selectById(entry.getKey());
+            group.setTeachplanName(teachplan != null ? teachplan.getPname() : "未知章节");
+            
+            // 转换为 WorkRecordVO
+            List<WorkRecordVO> workRecordVOs = entry.getValue().stream()
+                    .map(record -> {
+                        WorkRecordVO vo = new WorkRecordVO();
+                        BeanUtils.copyProperties(record, vo);
+                        
+                        // 获取用户信息
+                        // TODO: 调用用户服务获取用户名
+                        vo.setUsername("学生" + record.getUserId());
+                        
+                        // 获取作业评分信息
+                        LambdaQueryWrapper<WorkGrade> gradeWrapper = new LambdaQueryWrapper<WorkGrade>()
+                                .eq(WorkGrade::getWorkRecordId, record.getId())
+                                .orderByDesc(WorkGrade::getCreateDate)
+                                .last("LIMIT 1");
+                        WorkGrade grade = workGradeMapper.selectOne(gradeWrapper);
+                        if (grade != null) {
+                            vo.setCorrectComment(grade.getFeedback());
+                            vo.setGrade(grade.getGrade());
+                        }
+                        
+                        return vo;
+                    })
+                    .collect(Collectors.toList());
+            
+            group.setWorkRecordList(workRecordVOs);
+            groups.add(group);
+        }
+        result.setRecGroupDTOList(groups);
+
+        return result;
     }
 }

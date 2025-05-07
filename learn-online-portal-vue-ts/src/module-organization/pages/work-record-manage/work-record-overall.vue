@@ -9,16 +9,7 @@
       </div>-->
 
       <el-row>
-        <el-col :span="8">课程名称：{{ workRecOverall.courseName }}</el-col>
-        <el-col :span="8">课程包含作业数：{{ workRecOverall.workNumber }}</el-col>
-      </el-row>
-
-      <el-row>
-        <el-col :span="8">课程总人数：{{ workRecOverall.learnerNumber }}</el-col>
-        <el-col :span="8">提交作业人数：{{ workRecOverall.committerNumber }}</el-col>
-        <el-col
-          :span="8"
-        >作业总数/待批阅数：{{ workRecOverall.answerNumber }} / {{ workRecOverall.tobeReviewed }}</el-col>
+        <el-col :span="24">作业总数/待批阅数：{{ workRecOverall.totalSubmissions }} / {{ workRecOverall.pendingReviews }}</el-col>
       </el-row>
 
       <!-- 数据列表-->
@@ -42,18 +33,24 @@
               <template slot-scope="scope">{{ scope.row.createDate | dateTimeFormat }}</template>
             </el-table-column>
 
-            <el-table-column prop="correctComment" label="评语" align="center"></el-table-column>
-
-            <el-table-column label="状态" align="center">
-              <template slot-scope="scope">{{ getCourseWorkStatus(scope.row.status) }}</template>
+            <el-table-column label="分数" align="center" width="80">
+              <template slot-scope="scope">
+                {{ scope.row.grade || '-' }}
+              </template>
             </el-table-column>
 
-            <el-table-column label="操作" align="center">
+            <el-table-column prop="correctComment" label="评语" align="center"></el-table-column>
+
+            <el-table-column label="状态" align="center" width="100">
+              <template slot-scope="scope">{{ getWorkStatus(scope.row.status) }}</template>
+            </el-table-column>
+
+            <el-table-column label="操作" align="center" width="80">
               <template slot-scope="scope">
                 <el-button
                   type="text"
                   size="mini"
-                  :disabled="scope.row.status !== '306002'"
+                  :disabled="scope.row.status !== 'submitted' && scope.row.status !== 'graded'"
                   @click="handleOpenWorkRecordDialog(scope.row)"
                 >批阅</el-button>
               </template>
@@ -113,6 +110,13 @@ export default class WorkRecordOverall extends Vue {
   // 学生作业详情
   private answer: string | undefined = ''
 
+  // 作业状态常量
+  private readonly WORK_STATUS = {
+    'pending': '待完成',
+    'submitted': '已提交',
+    'graded': '已评分'
+  }
+
   // 计算属性
   getCourseWorkStatus(status: string) {
     let item = this.courseWorkStatus.find((value: IKVData) => {
@@ -125,8 +129,8 @@ export default class WorkRecordOverall extends Vue {
    * 生命周期钩子
    */
   created() {
-    let courseWorkId: any = this.$route.query.courseWorkId
-    this.courseWorkId = parseInt(courseWorkId)
+    let workId: any = this.$route.query.workId
+    this.courseWorkId = parseInt(workId)
     this.getWorkRecordReadOverAll()
   }
 
@@ -163,16 +167,27 @@ export default class WorkRecordOverall extends Vue {
    * 打开作业批阅对话框
    */
   private handleOpenWorkRecordDialog(row: IWorkRecordDTO) {
-    this.question = row.question
-    this.answer = row.answer
+    this.question = row.question || ''
+    this.answer = row.submitContent || ''
 
-    this.workRecord.coursePubId = row.coursePubId
-    this.workRecord.teachplanId = row.teachplanId
-    this.workRecord.teachplanName = row.teachplanName
-    this.workRecord.workId = row.workId
-    this.workRecord.workRecordId = row.workRecordId
+    this.workRecord = {
+      ...row,
+      coursePubId: row.coursePubId,
+      teachplanId: row.teachplanId,
+      teachplanName: row.teachplanName,
+      workId: row.workId,
+      workRecordId: row.id  // 使用id作为workRecordId
+    }
 
+    console.log('Opening dialog with work record:', this.workRecord)
     this.dialogVisible = true
+  }
+
+  /**
+   * 获取作业状态描述
+   */
+  private getWorkStatus(status: string): string {
+    return this.WORK_STATUS[status] || status
   }
 }
 </script>

@@ -120,4 +120,18 @@ public class WorkController {
         log.info("获取作业绑定的课程计划，作业ID：{}", workId);
         return teachplanWorkService.getTeachplansByWorkId(workId);
     }
+
+    @ApiOperation("获取作业批改详情")
+    @GetMapping("/work-record/read-over-all/{workId}")
+    public IWorkRecOverallDTO getWorkRecordReadOverAll(@PathVariable("workId") Long workId) {
+        log.info("获取作业批改详情，作业ID：{}", workId);
+        return workService.getWorkRecordReadOverAll(workId);
+    }
+
+    @ApiOperation("批改作业")
+    @PutMapping("/work-record/correction")
+    public void correctWorkRecord(@RequestBody WorkGradeDTO workGradeDTO) {
+        log.info("批改作业，参数：{}", workGradeDTO);
+        workService.grade(workGradeDTO);
+    }
 }

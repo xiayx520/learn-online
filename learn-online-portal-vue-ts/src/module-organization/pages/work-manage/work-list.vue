@@ -57,17 +57,19 @@
             <!-- 草稿状态：可编辑、发布、删除 -->
             <template v-if="scope.row.status === 'draft'">
               <el-button type="text" size="mini" @click="handleEdit(scope.row)">编辑</el-button>
-              <el-button type="text" size="mini" @click="handleBindTeachplan(scope.row.id)">绑定课程</el-button>
+              <el-button type="text" size="mini" @click="handleBindTeachplan(scope.row.id)">绑定课程计划</el-button>
               <el-button type="text" size="mini" @click="handlePublish(scope.row.id)">发布</el-button>
               <el-button type="text" size="mini" @click="handleOpenDeleteWorkConfirm(scope.row.id)">移除</el-button>
             </template>
-            <!-- 发布状态：可下线、归档 -->
+            <!-- 发布状态：可下线、归档，可批改 -->
             <template v-else-if="scope.row.status === 'published'">
+              <el-button type="text" size="mini" @click="handleGrade(scope.row.id)">批改</el-button>
               <el-button type="text" size="mini" @click="handleUnpublish(scope.row.id)">下线</el-button>
               <el-button type="text" size="mini" @click="handleArchive(scope.row.id)">归档</el-button>
             </template>
-            <!-- 归档状态：可取消归档 -->
+            <!-- 归档状态：可取消归档，可查看批改 -->
             <template v-else-if="scope.row.status === 'archived'">
+              <el-button type="text" size="mini" @click="handleGrade(scope.row.id)">查看批改</el-button>
               <el-button type="text" size="mini" @click="handleUnarchive(scope.row.id)">取消归档</el-button>
             </template>
           </template>
@@ -405,6 +407,16 @@ export default class WorkList extends Vue {
   private handleBindTeachplan(workId: number) {
     this.currentWorkId = workId
     this.bindTeachplanDialogVisible = true
+  }
+
+  /**
+   * 跳转到批改页面
+   */
+  private handleGrade(workId: number) {
+    this.$router.push({
+      path: `/organization/work-record-overall`,
+      query: { workId: workId.toString() }
+    })
   }
 }
 </script>

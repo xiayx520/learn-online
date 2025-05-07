@@ -37,7 +37,7 @@
           <template #default="{ node, data }">
             <span class="custom-tree-node">
               <span>{{ data.pname }}</span>
-              <span v-if="data.grade === 3">
+              <span>
                 <el-button
                   v-if="isNodeBound(data.id)"
                   type="text"
@@ -182,12 +182,31 @@ export default class BindTeachplanDialog extends Vue {
   // 解除绑定
   private async handleUnbind(teachplanId: number) {
     try {
+      await this.$confirm('确定要解除此课程计划的绑定吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+      
       await unbindTeachplan(this.workId, teachplanId)
       this.$message.success('解除绑定成功')
+      
+      // 更新已绑定的课程计划列表
       await this.loadBoundTeachplans()
+      
+      // 更新树的选中状态
+      const tree = this.$refs.tree as any
+      if (tree) {
+        tree.setCheckedKeys(this.boundTeachplanIds)
+      }
+      
+      // 通知父组件刷新
       this.$emit('success')
     } catch (error) {
-      this.$message.error('解除绑定失败')
+      if (error !== 'cancel') {
+        console.error('解除绑定失败:', error)
+        this.$message.error('解除绑定失败，请重试')
+      }
     }
   }
 

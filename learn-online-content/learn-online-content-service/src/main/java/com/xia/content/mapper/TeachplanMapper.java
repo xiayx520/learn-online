@@ -3,6 +3,7 @@ package com.xia.content.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.xia.content.model.po.Teachplan;
 import com.xia.content.model.vo.TeachPlanVO;
+import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ import java.util.List;
  *
  * @author itcast
  */
+@Mapper
 public interface TeachplanMapper extends BaseMapper<Teachplan> {
 
     /**

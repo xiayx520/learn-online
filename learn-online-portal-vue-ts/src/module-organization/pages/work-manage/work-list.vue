@@ -7,51 +7,84 @@
           type="primary"
           size="medium"
           class="btn-add el-button"
-          @click="handleOpenAddWorkDialog"
+          @click="handleAdd"
         >+新增作业</el-button>
+      </div>
+
+      <!-- 搜索栏 -->
+      <div class="searcher">
+        <el-select v-model="queryParams.status" placeholder="作业状态" clearable style="width: 120px; margin-right: 10px">
+          <el-option label="草稿" value="draft" />
+          <el-option label="已发布" value="published" />
+          <el-option label="已归档" value="archived" />
+        </el-select>
+        <el-button type="primary" @click="getList" style="margin-left: 10px">查询</el-button>
       </div>
 
       <!-- 数据列表 -->
       <el-table
         class="dataList"
-        v-loading="listLoading"
-        :data="listResult.items"
+        v-loading="loading"
+        :data="list"
         border
         style="width: 100%"
         :header-cell-style="{ textAlign: 'center' }"
       >
-        <el-table-column prop="title" label="作业信息" width="400" align="center"></el-table-column>
+        <el-table-column prop="title" label="作业标题" width="200" align="center"></el-table-column>
 
-        <el-table-column label="绑定课程" align="center">
-          <template slot-scope="scope">{{ scope.row.bindCourses | bindCoursesFormat }}</template>
-        </el-table-column>
-
-        <el-table-column prop="userNum" label="答题人数" align="center"></el-table-column>
-
-        <el-table-column label="修改时间" align="center">
-          <template slot-scope="scope">{{ scope.row.changeDate | dateTimeFormat }}</template>
-        </el-table-column>
-
-        <el-table-column label="操作" align="center">
+        <el-table-column prop="description" label="作业描述" width="300" align="center">
           <template slot-scope="scope">
-            <el-button type="text" size="mini" @click="handleOpenEditWorkDialog(scope.row)">编辑</el-button>
-            <el-button
-              type="text"
-              size="mini"
-              @click="handleOpenDeleteWorkConfirm(scope.row.workId)"
-            >移除</el-button>
+            <el-tooltip class="item" effect="dark" :content="scope.row.description" placement="top-start">
+              <span>{{ formatDescription(scope.row.description) }}</span>
+            </el-tooltip>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="userNum" label="答题人数" width="100" align="center"></el-table-column>
+
+        <el-table-column label="状态" width="100" align="center">
+          <template slot-scope="scope">
+            <el-tag :type="getStatusType(scope.row.status)">{{ getStatusText(scope.row.status) }}</el-tag>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="创建时间" align="center">
+          <template slot-scope="scope">{{ scope.row.createDate }}</template>
+        </el-table-column>
+
+        <el-table-column label="操作" width="300" align="center">
+          <template slot-scope="scope">
+            <!-- 草稿状态：可编辑、发布、删除 -->
+            <template v-if="scope.row.status === 'draft'">
+              <el-button type="text" size="mini" @click="handleEdit(scope.row)">编辑</el-button>
+              <el-button type="text" size="mini" @click="handleBindTeachplan(scope.row.id)">绑定课程</el-button>
+              <el-button type="text" size="mini" @click="handlePublish(scope.row.id)">发布</el-button>
+              <el-button type="text" size="mini" @click="handleOpenDeleteWorkConfirm(scope.row.id)">移除</el-button>
+            </template>
+            <!-- 发布状态：可下线、归档、查看提交记录 -->
+            <template v-else-if="scope.row.status === 'published'">
+              <el-button type="text" size="mini" @click="handleUnpublish(scope.row.id)">下线</el-button>
+              <el-button type="text" size="mini" @click="handleArchive(scope.row.id)">归档</el-button>
+              <el-button type="text" size="mini" @click="handleViewRecords(scope.row.id)">查看提交记录</el-button>
+            </template>
+            <!-- 归档状态：可取消归档 -->
+            <template v-else-if="scope.row.status === 'archived'">
+              <el-button type="text" size="mini" @click="handleUnarchive(scope.row.id)">取消归档</el-button>
+            </template>
           </template>
         </el-table-column>
       </el-table>
 
       <!-- 翻页控制 -->
       <div class="dataList-pagination">
-        <Pagination
-          v-show="listResult.counts > 0"
-          :total="listResult.counts"
-          :page.sync="listQuery.pageNo"
-          :limit.sync="listQuery.pageSize"
-          @pagination="getWorkPageList"
+        <el-pagination
+          v-if="total > 0"
+          :current-page.sync="queryParams.pageNo"
+          :page-size="queryParams.pageSize"
+          :total="total"
+          layout="total, prev, pager, next"
+          style="margin-top: 20px; text-align: right"
+          @current-change="getList"
         />
       </div>
     </div>
@@ -60,8 +93,15 @@
     <work-add-dialog
       :dialogVisible.sync="dialogVisible"
       :work="work"
-      @refreshList="getWorkPageList"
+      @refreshList="getList"
     ></work-add-dialog>
+
+    <!-- 绑定课程计划对话框 -->
+    <bind-teachplan-dialog
+      :dialogVisible.sync="bindTeachplanDialogVisible"
+      :workId="currentWorkId"
+      @success="getList"
+    ></bind-teachplan-dialog>
   </div>
 </template>
 
@@ -69,13 +109,16 @@
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import Pagination from '@/components/pagination/index.vue'
 import WorkAddDialog from './components/work-add-dialog.vue'
+import BindTeachplanDialog from './components/bind-teachplan-dialog.vue'
 import { IWorkPageList, IWorkDTO, IWorkVO } from '@/entity/work-page-list'
-import { getWorkPageList, deleteWork, defaultWork } from '@/api/works'
+import { getWorkPageList, deleteWork, defaultWork, publishWork, archiveWork, unpublishWork, unarchiveWork } from '@/api/works'
+import { getCourseList } from '@/api/courses'
 
 @Component({
   components: {
     Pagination,
-    WorkAddDialog
+    WorkAddDialog,
+    BindTeachplanDialog
   },
   filters: {
     bindCoursesFormat: (value: string[]) => {
@@ -83,37 +126,90 @@ import { getWorkPageList, deleteWork, defaultWork } from '@/api/works'
         return ''
       }
       return '《' + value.join('》，《') + '》'
+    },
+    descriptionFormat: (value: string) => {
+      if (!value) return ''
+      return value.length > 50 ? value.substring(0, 50) + '...' : value
+    },
+    statusFormat: (value: string) => {
+      const statusMap: { [key: string]: string } = {
+        draft: '草稿',
+        published: '已发布',
+        archived: '已归档'
+      }
+      return statusMap[value] || value
+    },
+    statusTypeFormat: (value: string) => {
+      const typeMap: { [key: string]: string } = {
+        draft: '',
+        published: 'success',
+        archived: 'info'
+      }
+      return typeMap[value] || ''
     }
   }
 })
 export default class WorkList extends Vue {
   // 是否载入中
-  private listLoading: boolean = false
+  private loading: boolean = false
   // 请求参数Query
-  private listQuery = {
+  private queryParams = {
     pageNo: 1,
-    pageSize: 10
+    pageSize: 10,
+    status: ''
   }
   // 作业列表
-  private listResult: IWorkPageList = {}
+  private list: IWorkDTO[] = []
   // 新增作业对话框
   private dialogVisible: boolean = false
   // 单条作业
   private work: IWorkVO = Object.assign({}, defaultWork)
+  // 总记录数
+  private total: number = 0
+  private bindTeachplanDialogVisible = false
+  private currentWorkId: number | null = null
+  private courseList: any[] = []
+
+  created() {
+    this.getList()
+  }
 
   /**
    * 作业列表
    */
-  private async getWorkPageList() {
-    this.listLoading = true
-    this.listResult = await getWorkPageList(this.listQuery)
-    this.listLoading = false
+  private async getList() {
+    try {
+      this.loading = true
+      console.log('开始获取作业列表，参数：', this.queryParams)
+      const result = await getWorkPageList(this.queryParams)
+      console.log('获取作业列表结果：', result)
+      console.log('返回数据类型：', typeof result)
+      console.log('是否包含 records：', 'records' in result)
+      console.log('是否包含 total：', 'total' in result)
+      console.log('records 类型：', Array.isArray(result.records) ? 'array' : typeof result.records)
+      
+      if (!result.records) {
+        console.warn('返回数据中没有 records 字段')
+        this.list = []
+        this.total = 0
+        return
+      }
+      
+      this.list = result.records
+      this.total = result.total || 0
+      console.log('设置到组件的数据：', this.list)
+    } catch (error) {
+      console.error('获取作业列表失败:', error)
+      this.$message.error('获取作业列表失败')
+    } finally {
+      this.loading = false
+    }
   }
 
   /**
    * 新增作业
    */
-  private handleOpenAddWorkDialog() {
+  private handleAdd() {
     this.work = Object.assign({}, defaultWork)
     this.dialogVisible = true
   }
@@ -121,16 +217,73 @@ export default class WorkList extends Vue {
   /**
    * 编辑作业
    */
-  private handleOpenEditWorkDialog(row: IWorkDTO) {
-    this.work.workId = row.workId
-    this.work.title = row.title
-    this.work.question = row.question
+  private handleEdit(row: IWorkDTO) {
+    this.work = {
+      id: row.id,
+      title: row.title,
+      description: row.description
+    }
     this.dialogVisible = true
   }
 
   /**
+   * 发布作业
+   */
+  private async handlePublish(workId: number) {
+    try {
+      await this.$confirm('确定要发布该作业吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+      await publishWork(workId)
+      this.$message({
+        type: 'success',
+        message: '发布成功!'
+      })
+      this.getList()
+    } catch (error) {
+      if (error !== 'cancel') {
+        this.$message.error('发布失败，请重试')
+      }
+    }
+  }
+
+  /**
+   * 归档作业
+   */
+  private async handleArchive(workId: number) {
+    try {
+      await this.$confirm('确定要归档该作业吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+      await archiveWork(workId)
+      this.$message({
+        type: 'success',
+        message: '归档成功!'
+      })
+      this.getList()
+    } catch (error) {
+      if (error !== 'cancel') {
+        this.$message.error('归档失败，请重试')
+      }
+    }
+  }
+
+  /**
+   * 查看提交记录
+   */
+  private handleViewRecords(workId: number) {
+    this.$router.push({
+      path: '/organization/work-record-manage/work-record-list',
+      query: { workId: workId.toString() }
+    })
+  }
+
+  /**
    * 移除作业
-   * TODO: 等待后台业务确认
    */
   private handleOpenDeleteWorkConfirm(workId: number) {
     this.$confirm('此操作将永久移除该作业, 是否继续?', '提示', {
@@ -139,9 +292,8 @@ export default class WorkList extends Vue {
       type: 'warning'
     })
       .then(async () => {
-        let work: IWorkDTO = await deleteWork(workId)
-        this.getWorkPageList()
-
+        await deleteWork(workId)
+        this.getList()
         this.$message({
           type: 'success',
           message: '移除成功!'
@@ -155,20 +307,139 @@ export default class WorkList extends Vue {
       })
   }
 
-  // 监控 watch
-  // 搜索栏
-  @Watch('listQueryData', { deep: true, immediate: true })
-  private watchListQueryData(newVal: string) {
-    if (newVal == '') {
-      return
+  /**
+   * 下线作业
+   */
+  private async handleUnpublish(workId: number) {
+    try {
+      await this.$confirm('确定要下线该作业吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+      await unpublishWork(workId)
+      this.$message({
+        type: 'success',
+        message: '下线成功!'
+      })
+      this.getList()
+    } catch (error) {
+      if (error !== 'cancel') {
+        this.$message.error('下线失败，请重试')
+      }
     }
-    this.getWorkPageList()
+  }
+
+  /**
+   * 取消归档
+   */
+  private async handleUnarchive(workId: number) {
+    try {
+      await this.$confirm('确定要取消归档该作业吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+      await unarchiveWork(workId)
+      this.$message({
+        type: 'success',
+        message: '取消归档成功!'
+      })
+      this.getList()
+    } catch (error) {
+      if (error !== 'cancel') {
+        this.$message.error('取消归档失败，请重试')
+      }
+    }
+  }
+
+  /**
+   * 格式化描述
+   */
+  private formatDescription(value: string): string {
+    if (!value) return ''
+    return value.length > 50 ? value.substring(0, 50) + '...' : value
+  }
+
+  /**
+   * 格式化绑定课程
+   */
+  private formatBindCourses(value?: string[]): string {
+    if (!value || value.length === 0) return ''
+    return '《' + value.join('》，《') + '》'
+  }
+
+  /**
+   * 获取状态类型
+   */
+  private getStatusType(status: string): string {
+    const map: { [key: string]: string } = {
+      draft: 'info',
+      published: 'success',
+      archived: 'warning'
+    }
+    return map[status] || 'info'
+  }
+
+  /**
+   * 获取状态文本
+   */
+  private getStatusText(status: string): string {
+    const map: { [key: string]: string } = {
+      draft: '草稿',
+      published: '已发布',
+      archived: '已归档'
+    }
+    return map[status] || status
+  }
+
+  // 监控 watch
+  // 搜索栏 - 状态筛选
+  @Watch('queryParams.status')
+  private watchStatus() {
+    this.getList()
   }
 
   // 翻页 pageSize
-  @Watch('listQuery.pageSize', { immediate: true })
+  @Watch('queryParams.pageSize')
   private watchListQueryPageSize(newVal: number) {
-    this.listQuery.pageNo = 1
+    this.queryParams.pageNo = 1
+  }
+
+  bindCoursesFormat(bindCourses: string): string {
+    if (!bindCourses) return '未绑定';
+    try {
+      const courses = JSON.parse(bindCourses);
+      return courses.map((course: any) => course.name).join('、');
+    } catch (e) {
+      return '格式错误';
+    }
+  }
+
+  /**
+   * 绑定课程计划
+   */
+  private handleBindTeachplan(workId: number) {
+    this.currentWorkId = workId
+    this.bindTeachplanDialogVisible = true
+  }
+
+  // 加载课程列表
+  private async loadCourseList() {
+    try {
+      const pageParams = {
+        pageNo: 1,
+        pageSize: 100
+      }
+      // 只传递查询条件作为请求体
+      const queryCourseParamsDto = {
+        publishStatus: '203002' // 已发布状态
+      }
+      const result = await getCourseList(pageParams, queryCourseParamsDto)
+      this.courseList = result.items || []
+    } catch (error) {
+      this.$message.error('获取课程列表失败')
+    }
   }
 }
 </script>
@@ -185,18 +456,25 @@ export default class WorkList extends Vue {
 
   .searcher {
     margin-top: 16px;
+    display: flex;
+    align-items: center;
 
-    div {
-      width: 218px;
+    .status-select {
+      width: 120px;
       margin-right: 10px;
     }
   }
 
   .dataList {
     margin-top: 16px;
+
+    .el-tag {
+      min-width: 60px;
+    }
   }
 
   .dataList-pagination {
+    margin-top: 16px;
     text-align: center;
     width: 100%;
   }

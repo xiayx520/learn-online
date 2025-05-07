@@ -3,27 +3,21 @@
  */
 export interface IWorkPageList {
   /**
-   * 数据记录总数
+   * 总记录数
    */
-  counts?: number
-  first?: boolean
+  total: number
   /**
    * 数据列表
    */
-  items?: IWorkDTO[]
-  itemsSize?: number
+  records: IWorkDTO[]
   /**
    * 当前页码
    */
-  page?: number
+  pageNo: number
   /**
-   * 总页数
+   * 每页大小
    */
-  pages?: number
-  /**
-   * 一页数据数
-   */
-  pageSize?: number
+  pageSize: number
 }
 
 /**
@@ -31,57 +25,57 @@ export interface IWorkPageList {
  */
 export interface IWorkDTO {
   /**
+   * 作业ID
+   */
+  id: number
+  /**
+   * 标题
+   */
+  title: string
+  /**
+   * 描述
+   */
+  description: string
+  /**
+   * 状态：draft-草稿，published-已发布，archived-已归档
+   */
+  status: string
+  /**
+   * 创建人ID
+   */
+  createUser?: number
+  /**
+   * 创建时间
+   */
+  createDate: string
+  /**
+   * 修改时间
+   */
+  changeDate: string
+  /**
    * 绑定课程名称列表
    */
   bindCourses?: string[]
   /**
-   * 修改时间
-   */
-  changeDate?: string
-  /**
-   * 创建时间
-   */
-  createDate?: string
-  /**
-   * 内容
-   */
-  question: string
-  /**
-   * 状态:使用态--1，删除态--0
-   */
-  status?: number
-  /**
-   * 标题
-   */
-  title: string
-  /**
-   * 创建人
-   */
-  username?: string
-  /**
    * 答题人数
    */
   userNum?: number
-  /**
-   * 作业Id值
-   */
-  workId?: number
 }
 
 /**
- * 作业VO
+ * 作业VO（新增/编辑请求）
  */
 export interface IWorkVO {
   /**
-   * 内容
+   * 作业ID（编辑时需要）
    */
-  question: string
+  id?: number
   /**
    * 标题
    */
   title: string
   /**
-   * 作业Id值
+   * 描述
    */
-  workId?: number
+  description: string
 }

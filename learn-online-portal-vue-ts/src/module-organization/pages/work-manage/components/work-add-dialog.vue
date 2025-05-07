@@ -9,12 +9,12 @@
       <el-form-item label="作业名称：" prop="title">
         <el-input v-model="work.title" placeholder="请输入作业名称"></el-input>
       </el-form-item>
-      <el-form-item label="题干：" prop="question">
+      <el-form-item label="作业描述：" prop="description">
         <el-input
           type="textarea"
           :rows="5"
-          v-model="work.question"
-          placeholder="请输入作业要求"
+          v-model="work.description"
+          placeholder="请输入作业描述"
           maxlength="500"
           show-word-limit
         ></el-input>
@@ -43,11 +43,11 @@ export default class WorkAddDialog extends Vue {
   // 验证规则
   private rules: any = {
     title: [{ required: true, message: '请输入作业名称', trigger: 'change' }],
-    question: [{ required: true, message: '请输入作业要求', trigger: 'change' }]
+    description: [{ required: true, message: '请输入作业描述', trigger: 'change' }]
   }
   // 用户操作
   getAction() {
-    return !this.work.workId ? '新增' : '编辑'
+    return !this.work.id ? '新增' : '编辑'
   }
 
   /**

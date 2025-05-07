@@ -12,7 +12,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -69,14 +68,6 @@ public class WorkController {
     public PageResult<WorkRecord> listWorkRecords(PageParams pageParams, @RequestBody QueryWorkRecordParamsDto queryWorkRecordParamsDto) {
         log.info("查询作业提交记录，参数：{}", queryWorkRecordParamsDto);
         return workService.queryWorkRecordList(pageParams, queryWorkRecordParamsDto);
-    }
-
-
-    @PostMapping("/work/grade")
-    @ApiOperation("评分")
-    public void grade(@RequestBody @Validated WorkGradeDTO workGradeDTO) {
-        log.info("评分，参数：{}", workGradeDTO);
-        workService.grade(workGradeDTO);
     }
 
     @ApiOperation("删除作业")

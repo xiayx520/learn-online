@@ -50,8 +50,8 @@
                     <div class="top-cont">
                         <div class="col-lg-8">
                             <div class="imgIco"><img src="http://www.51xuecheng.cn/static/img/asset-timg.png" width="60" height="28" alt=""></div>
-                            <div class="title"><span class="lab">继续学习</span> 程序语言设计 <span class="status">学习中</span></div>
-                            <div class="about"><span class="lab">正在学习</span> 使用对象 <span class="data">有效日期: 2017.06.05 - 2018.06.05</span></div>
+                            <div class="title"><span class="lab">继续学习</span> {{course.courseName}} <span class="status">学习中</span></div>
+                            <div class="about"><span class="lab">正在学习</span> {{course.teachplanName}} <span class="data">有效日期: {{course.validtimeStart}} - {{course.validtimeEnd}}</span></div>
                             <div class="rate">
                                 <li class="active"></li>
                                 <li></li>
@@ -60,8 +60,8 @@
                         </div>
                         <div class="division"></div>
                         <div class="col-lg-4 text-right">
-                            <a href="#" class="goLear"> 继续学习</a>
-                            <a href="#" class="evalu"> 课程评价</a>
+                            <a :href="course.teachplanId ? 'http://www.51xuecheng.cn/course/learning.html?id='+course.courseId+'&chapter='+course.teachplanId : 'http://www.51xuecheng.cn/course/learning.html?id='+course.courseId" class="goLear"> 继续学习</a>
+                            <a :href="'http://www.51xuecheng.cn/course/preview/learning.html?id='+course.courseId+'#artcleWork'" class="evalu"> 课程作业</a>
                             <div class="aft" style="top:0px;right:0px;">● ● ●
                                 <ul></ul>
                             </div>
@@ -91,8 +91,8 @@
                                     <li></li>
                                     <li></li><span>1/4 已完成部分 <em>进度 25%</em></span></div>
                                 <div class="parting"></div>
-                                <div class="butItem text-center" v-if="course.teachplanId"><a :href="'http://www.51xuecheng.cn/course/learning.html?id='+course.courseId+'&chapter='+course.teachplanId" class="golearing" target="_blank">继续学习</a> <a href="#" class="classcom">课程评价</a></div>
-                                <div class="butItem text-center" v-else><a :href="'http://www.51xuecheng.cn/course/learning.html?id='+course.courseId" class="golearing" target="_blank">继续学习</a> <a href="#" class="classcom">课程评价</a></div>
+                                <div class="butItem text-center" v-if="course.teachplanId"><a :href="'http://www.51xuecheng.cn/course/learning.html?id='+course.courseId+'&chapter='+course.teachplanId" class="golearing" target="_blank">继续学习</a> <a :href="'http://www.51xuecheng.cn/course/preview/learning.html?id='+course.courseId+'#artcleWork'" class="classcom">课程作业</a></div>
+                                <div class="butItem text-center" v-else><a :href="'http://www.51xuecheng.cn/course/learning.html?id='+course.courseId" class="golearing" target="_blank">继续学习</a> <a :href="'http://www.51xuecheng.cn/course/preview/learning.html?id='+course.courseId+'#artcleWork'" class="classcom">课程作业</a></div>
                             </div>
                         </div>
                         
@@ -195,7 +195,8 @@
                 sortType:'',
                 expiresType:''
             },
-            mycourseTables:[]
+            mycourseTables:[],
+            course: {} // 添加最近学习课程对象
         },
          methods: {
             sort(type){
@@ -219,6 +220,9 @@
             myCourseTables(){
                 myCourseTablesFun(this.params).then(res=>{
                    this.mycourseTables=res.items
+                   if(res.items && res.items.length > 0) {
+                       this.course = res.items[0] // 设置最近学习的课程为第一个课程
+                   }
                })
             }
          },

@@ -10,6 +10,8 @@ import java.util.List;
 public class TeachPlanVO extends Teachplan {
     //课程计划媒资信息
     private TeachplanMedia teachplanMedia;
+    //课程计划作业信息
+    private TeachplanWorkVO teachplanWork;
     //子节点
     private List<TeachPlanVO> teachPlanTreeNodes;
 }

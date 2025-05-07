@@ -16,6 +16,13 @@ public interface TeachPlanService {
     List<TeachPlanVO> getTeachPlanTree(Long courseId);
 
     /**
+     * 获取课程计划树形结构，包含作业信息
+     * @param courseId 课程id
+     * @return 课程计划树形结构(包含作业信息)
+     */
+    List<TeachPlanVO> getTeachPlanTreeWithWork(Long courseId);
+
+    /**
      * 保存课程计划
      * @param saveTeachplanDto
      */

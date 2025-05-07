@@ -18,6 +18,13 @@ public class WorkSubmitDTO {
     @ApiModelProperty(value = "作业ID", required = true)
     private Long workId;
 
+    @NotNull(message = "课程计划ID不能为空")
+    @ApiModelProperty(value = "课程计划ID", required = true)
+    private Long teachplanId;
+    
+    @ApiModelProperty(value = "课程ID", required = false)
+    private Long courseId;
+
     @NotEmpty(message = "提交内容不能为空")
     @ApiModelProperty(value = "提交内容", required = true)
     private String content;

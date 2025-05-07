@@ -8,6 +8,7 @@ import com.xia.content.model.dto.WorkInfoDto;
 import com.xia.content.model.dto.WorkSubmitDTO;
 import com.xia.content.model.po.WorkInfo;
 import com.xia.content.model.po.WorkRecord;
+import com.xia.content.model.po.WorkGrade;
 import com.xia.content.model.dto.IWorkRecOverallDTO;
 
 public interface WorkService {
@@ -33,6 +34,20 @@ public interface WorkService {
      * @return 分页结果
      */
     PageResult<WorkRecord> queryWorkRecordList(PageParams pageParams, QueryWorkRecordParamsDto queryWorkRecordParamsDto);
+
+    /**
+     * 根据作业ID获取当前用户的作业提交记录
+     * @param workId 作业ID
+     * @return 作业提交记录
+     */
+    WorkRecord getWorkRecordById(Long workId);
+
+    /**
+     * 根据作业记录ID获取评分信息
+     * @param recordId 作业记录ID
+     * @return 作业评分信息
+     */
+    WorkGrade getWorkGradeByRecordId(Long recordId);
 
     /**
      * 发布作业

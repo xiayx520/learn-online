@@ -4,11 +4,13 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.xia.base.exception.GlobalException;
 import com.xia.content.mapper.TeachplanMapper;
 import com.xia.content.mapper.TeachplanMediaMapper;
+import com.xia.content.mapper.TeachplanWorkMapper;
 import com.xia.content.model.dto.BindTeachplanMediaDto;
 import com.xia.content.model.dto.SaveTeachplanDto;
 import com.xia.content.model.po.Teachplan;
 import com.xia.content.model.po.TeachplanMedia;
 import com.xia.content.model.vo.TeachPlanVO;
+import com.xia.content.model.vo.TeachplanWorkVO;
 import com.xia.content.service.TeachPlanService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,9 @@ public class TeachPlanServiceImpl implements TeachPlanService {
     @Autowired
     private TeachplanMediaMapper teachplanMediaMapper;
 
+    @Autowired
+    private TeachplanWorkMapper teachplanWorkMapper;
+
     /**
      * 获取课程计划
      *
@@ -36,6 +41,59 @@ public class TeachPlanServiceImpl implements TeachPlanService {
     @Override
     public List<TeachPlanVO> getTeachPlanTree(Long courseId) {
         return teachplanMapper.getTeachPlanTree(courseId);
+    }
+
+    /**
+     * 获取课程计划树形结构，包含作业信息
+     *
+     * @param courseId 课程id
+     * @return 课程计划树形结构(包含作业信息)
+     */
+    @Override
+    public List<TeachPlanVO> getTeachPlanTreeWithWork(Long courseId) {
+        // 获取课程计划基本结构
+        List<TeachPlanVO> teachPlanTree = getTeachPlanTree(courseId);
+        
+        // 获取课程关联的所有作业信息
+        List<TeachplanWorkVO> teachplanWorks = teachplanWorkMapper.getTeachplanWorksByCourseId(courseId);
+        
+        // 将作业信息关联到对应的课程计划中
+        if (teachPlanTree != null && !teachPlanTree.isEmpty() && teachplanWorks != null && !teachplanWorks.isEmpty()) {
+            // 为每个课程计划节点关联作业信息
+            associateWorkWithTeachplan(teachPlanTree, teachplanWorks);
+        }
+        
+        return teachPlanTree;
+    }
+    
+    /**
+     * 递归关联作业与课程计划
+     * @param teachPlanNodes 课程计划节点
+     * @param teachplanWorks 作业信息列表
+     */
+    private void associateWorkWithTeachplan(List<TeachPlanVO> teachPlanNodes, List<TeachplanWorkVO> teachplanWorks) {
+        if (teachPlanNodes == null || teachplanWorks == null) {
+            return;
+        }
+        
+        for (TeachPlanVO teachPlanNode : teachPlanNodes) {
+            // 只有小节(grade=2)才能关联作业
+            if (teachPlanNode.getGrade() == 2) {
+                // 查找对应的作业信息
+                for (TeachplanWorkVO teachplanWork : teachplanWorks) {
+                    if (teachPlanNode.getId().equals(teachplanWork.getTeachplanId())) {
+                        teachPlanNode.setTeachplanWork(teachplanWork);
+                        break;
+                    }
+                }
+            }
+            
+            // 递归处理子节点
+            List<TeachPlanVO> childNodes = teachPlanNode.getTeachPlanTreeNodes();
+            if (childNodes != null && !childNodes.isEmpty()) {
+                associateWorkWithTeachplan(childNodes, teachplanWorks);
+            }
+        }
     }
 
     /**

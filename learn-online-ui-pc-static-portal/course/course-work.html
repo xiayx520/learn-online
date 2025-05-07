@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="http://www.51xuecheng.cn/static/img/asset-favicon.ico">
+    <title>学成在线-课程作业</title>
+
+    <link rel="stylesheet" href="http://www.51xuecheng.cn/static/plugins/normalize-css/normalize.css" />
+    <link rel="stylesheet" href="http://www.51xuecheng.cn/static/plugins/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="http://www.51xuecheng.cn/static/css/el/index.css" />
+    <link rel="stylesheet" href="http://www.51xuecheng.cn/css/course-work.css" />
+    <script src="http://www.51xuecheng.cn/static/js/vue/vue.min.js"></script>
+    <script src="http://www.51xuecheng.cn/static/js/axios/axios.min.js"></script>
+    <script src="http://www.51xuecheng.cn/static/js/util.js"></script>
+    <script src="http://www.51xuecheng.cn/static/js/public.js"></script>
+    <script src="http://www.51xuecheng.cn/static/css/el/index.js"></script>
+</head>
+
+<body>
+    <!-- 页面头部 -->
+    <div class="header">
+        <!-- 这里可以添加顶部导航栏 -->
+    </div>
+
+    <!-- 课程作业主体内容 -->
+    <div class="course-work-container">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="course-title">
+                        <h2 id="courseNameText">课程作业</h2>
+                        <a href="javascript:history.back()" class="btn-back">返回课程</a>
+                    </div>
+                    
+                    <!-- 课程作业展示区域 -->
+                    <div id="artcleWork" class="article-cont">
+                        <div class="article-left-box">
+                            <div class="content">
+                                <div class="content-title">
+                                    <p><a class="all" href="javascript:void(0)">课程作业列表</a></p>
+                                </div>
+                                <div class="content-com course-work-list">
+                                    <div class="no-data" style="display: none;">
+                                        <p>该课程暂无作业</p>
+                                    </div>
+                                    <div class="work-list-container">
+                                        <!-- 作业列表将在这里动态生成 -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页面底部 -->
+    <div class="footer">
+        <!-- 底部内容 -->
+    </div>
+
+    <!-- 作业内容模板 -->
+    <script type="text/template" id="work-item-template">
+        <div class="work-item" data-work-id="{{workId}}" data-teachplan-id="{{teachplanId}}">
+            <div class="work-title">
+                <h4>{{workTitle}}</h4>
+                <span class="work-status {{status}}">{{statusText}}</span>
+            </div>
+            <div class="work-info">
+                <p class="work-chapter">所属章节：{{chapterName}}</p>
+                <p class="work-desc">作业要求：{{description}}</p>
+            </div>
+            <div class="work-actions">
+                <a href="javascript:;" class="btn-submit-work">提交作业</a>
+                <a href="javascript:;" class="btn-view-work">查看作业提交状态</a>
+            </div>
+        </div>
+    </script>
+
+    <!-- 作业提交表单模板 -->
+    <script type="text/template" id="work-submit-template">
+        <div class="work-submit-form">
+            <h3>提交作业 - {{workTitle}}</h3>
+            <div class="form-group">
+                <label>作业内容：</label>
+                <textarea class="work-content" rows="6" placeholder="请输入作业内容..."></textarea>
+            </div>
+            <div class="form-actions">
+                <button class="btn-cancel">取消</button>
+                <button class="btn-submit">提交</button>
+            </div>
+        </div>
+    </script>
+
+    <!-- 作业查看模板 -->
+    <script type="text/template" id="work-view-template">
+        <div class="work-view">
+            <h3>作业详情 - {{workTitle}}</h3>
+            <div class="work-status-bar">
+                <span class="status-label">状态：</span>
+                <span class="work-status-text {{statusClass}}">{{statusText}}</span>
+            </div>
+            <div class="work-content">
+                <p>{{content}}</p>
+            </div>
+            <div class="work-grade" style="{{showGrade}}">
+                <p>评分：<span class="grade-value">{{grade}}</span></p>
+                <p>评语：<span class="grade-comment">{{comment}}</span></p>
+            </div>
+            <div class="form-actions">
+                <button class="btn-close">关闭</button>
+            </div>
+        </div>
+    </script>
+
+    <script type="text/javascript" src="http://www.51xuecheng.cn/static/plugins/jquery/dist/jquery.js"></script>
+    <script type="text/javascript" src="http://www.51xuecheng.cn/static/plugins/bootstrap/dist/js/bootstrap.js"></script>
+    <script type="text/javascript" src="http://www.51xuecheng.cn/js/course-work.js"></script>
+    
+    <!-- 课程作业页面专用JS -->
+    <script type="text/javascript">
+        $(function() {
+            // 获取课程名称
+            const courseId = getQueryVariable('courseId');
+            if(courseId) {
+                // 设置课程名称
+                $.ajax({
+                    url: `http://www.51xuecheng.cn/api/content/course/${courseId}`,
+                    type: 'GET',
+                    success: function(response) {
+                        if(response && response.name) {
+                            $('#courseNameText').text(response.name + ' - 课程作业');
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html> 

@@ -34,6 +34,17 @@ public class TeachPlanController {
     }
 
     /**
+     * 获取课程计划树形结构，包含作业信息
+     * @param courseId 课程id
+     * @return 课程计划树形结构(含作业信息)
+     */
+    @GetMapping("/teachplan/{courseId}/tree-nodes-with-work")
+    @ApiOperation("获取课程计划树形结构(含作业信息)")
+    public List<TeachPlanVO> getTeachPlanTreeWithWork(@PathVariable Long courseId) {
+        return teachPlanService.getTeachPlanTreeWithWork(courseId);
+    }
+
+    /**
      * 保存课程计划
      * @param saveTeachplanDto
      */

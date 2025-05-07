@@ -6,6 +6,7 @@ import com.xia.content.model.dto.*;
 import com.xia.content.model.po.TeachplanWork;
 import com.xia.content.model.po.WorkInfo;
 import com.xia.content.model.po.WorkRecord;
+import com.xia.content.model.po.WorkGrade;
 import com.xia.content.service.TeachplanWorkService;
 import com.xia.content.service.WorkService;
 import io.swagger.annotations.Api;
@@ -68,6 +69,20 @@ public class WorkController {
     public PageResult<WorkRecord> listWorkRecords(PageParams pageParams, @RequestBody QueryWorkRecordParamsDto queryWorkRecordParamsDto) {
         log.info("查询作业提交记录，参数：{}", queryWorkRecordParamsDto);
         return workService.queryWorkRecordList(pageParams, queryWorkRecordParamsDto);
+    }
+
+    @ApiOperation("根据ID获取作业记录")
+    @GetMapping("/work-record/{workId}")
+    public WorkRecord getWorkRecord(@PathVariable("workId") Long workId) {
+        log.info("获取作业记录，workId：{}", workId);
+        return workService.getWorkRecordById(workId);
+    }
+
+    @ApiOperation("根据作业记录ID获取评分信息")
+    @GetMapping("/work-grade/{recordId}")
+    public WorkGrade getWorkGrade(@PathVariable("recordId") Long recordId) {
+        log.info("获取作业评分信息，recordId：{}", recordId);
+        return workService.getWorkGradeByRecordId(recordId);
     }
 
     @ApiOperation("删除作业")

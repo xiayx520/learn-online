@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xia.content.mapper.TeachplanWorkMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xia.content.model.po.TeachplanWork">
+        <id column="id" property="id"/>
+        <result column="work_id" property="workId"/>
+        <result column="work_title" property="workTitle"/>
+        <result column="teachplan_id" property="teachplanId"/>
+        <result column="course_id" property="courseId"/>
+        <result column="course_pub_id" property="coursePubId"/>
+        <result column="create_date" property="createDate"/>
+    </resultMap>
+    
+    <!-- 课程计划作业VO映射结果 -->
+    <resultMap id="TeachplanWorkVOMap" type="com.xia.content.model.vo.TeachplanWorkVO" extends="BaseResultMap">
+        <association property="workInfo" javaType="com.xia.content.model.po.WorkInfo">
+            <id column="work_info_id" property="id"/>
+            <result column="title" property="title"/>
+            <result column="description" property="description"/>
+            <result column="status" property="status"/>
+            <result column="create_user" property="createUser"/>
+            <result column="create_date" property="createDate"/>
+            <result column="change_date" property="changeDate"/>
+            <result column="user_num" property="userNum"/>
+        </association>
+    </resultMap>
+    
+    <!-- 根据课程ID查询课程计划关联的作业信息 -->
+    <select id="getTeachplanWorksByCourseId" resultMap="TeachplanWorkVOMap">
+        SELECT 
+            tw.id,
+            tw.work_id,
+            tw.work_title,
+            tw.teachplan_id,
+            tw.course_id,
+            tw.course_pub_id,
+            tw.create_date,
+            wi.id as work_info_id,
+            wi.title,
+            wi.description,
+            wi.status,
+            wi.create_user,
+            wi.create_date,
+            wi.change_date,
+            wi.user_num
+        FROM 
+            teachplan_work tw
+        LEFT JOIN 
+            work_info wi ON tw.work_id = wi.id
+        WHERE 
+            tw.course_id = #{courseId}
+    </select>
+</mapper> 

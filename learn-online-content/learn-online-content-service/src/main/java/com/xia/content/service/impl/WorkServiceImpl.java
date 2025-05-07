@@ -5,15 +5,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xia.base.exception.GlobalException;
 import com.xia.base.model.PageParams;
 import com.xia.base.model.PageResult;
-import com.xia.content.mapper.TeachplanMapper;
-import com.xia.content.mapper.WorkGradeMapper;
-import com.xia.content.mapper.WorkMapper;
-import com.xia.content.mapper.WorkRecordMapper;
+import com.xia.content.mapper.*;
 import com.xia.content.model.dto.*;
-import com.xia.content.model.po.Teachplan;
-import com.xia.content.model.po.WorkGrade;
-import com.xia.content.model.po.WorkInfo;
-import com.xia.content.model.po.WorkRecord;
+import com.xia.content.model.po.*;
 import com.xia.content.model.vo.WorkRecordVO;
 import com.xia.content.service.WorkService;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +38,9 @@ public class WorkServiceImpl implements WorkService {
 
     @Autowired
     private TeachplanMapper teachplanMapper;
+
+    @Autowired
+    private TeachplanWorkMapper teachplanWorkMapper;
 
     // 作业状态常量
     private static final String STATUS_DRAFT = "draft";
@@ -152,46 +149,68 @@ public class WorkServiceImpl implements WorkService {
     @Override
     @Transactional
     public WorkRecord submitWork(WorkSubmitDTO workSubmitDTO) {
-        // 校验作业是否存在且已发布
+        // 检查作业是否存在
         WorkInfo workInfo = workMapper.selectById(workSubmitDTO.getWorkId());
         if (workInfo == null) {
+            log.error("作业不存在，workId: {}", workSubmitDTO.getWorkId());
             throw new GlobalException("作业不存在");
         }
+        
+        // 检查课程计划是否存在
+        Teachplan teachplan = teachplanMapper.selectById(workSubmitDTO.getTeachplanId());
+        if (teachplan == null) {
+            log.error("课程计划不存在，teachplanId: {}", workSubmitDTO.getTeachplanId());
+            throw new GlobalException("课程计划不存在");
+        }
+        
+        // 检查作业和课程计划的关联关系
+        LambdaQueryWrapper<TeachplanWork> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(TeachplanWork::getWorkId, workSubmitDTO.getWorkId())
+                    .eq(TeachplanWork::getTeachplanId, workSubmitDTO.getTeachplanId());
+        TeachplanWork teachplanWork = teachplanWorkMapper.selectOne(queryWrapper);
+        if (teachplanWork == null) {
+            log.error("作业未绑定到指定课程计划，workId: {}, teachplanId: {}", 
+                    workSubmitDTO.getWorkId(), workSubmitDTO.getTeachplanId());
+            throw new GlobalException("作业未绑定到指定课程计划");
+        }
+        
+        // 检查作业是否已发布
         if (!STATUS_PUBLISHED.equals(workInfo.getStatus())) {
+            log.error("作业未发布，不能提交，workId: {}", workSubmitDTO.getWorkId());
             throw new GlobalException("作业未发布，不能提交");
         }
-
-        // 获取当前用户ID（实际项目中应从SecurityContext获取）
-        Long userId = 1L; // TODO: 从SecurityContext获取当前用户ID
-
-        // 查询是否已提交过
-        LambdaQueryWrapper<WorkRecord> queryWrapper = new LambdaQueryWrapper<WorkRecord>()
-                .eq(WorkRecord::getWorkId, workSubmitDTO.getWorkId())
-                .eq(WorkRecord::getUserId, userId);
-        WorkRecord existRecord = workRecordMapper.selectOne(queryWrapper);
-
+        
+        // 查询是否已有提交记录
+        LambdaQueryWrapper<WorkRecord> recordQueryWrapper = new LambdaQueryWrapper<>();
+        recordQueryWrapper.eq(WorkRecord::getWorkId, workSubmitDTO.getWorkId())
+                          .eq(WorkRecord::getUserId, 1L); // TODO: 替换为实际的学生ID获取逻辑
+        
+        WorkRecord existingRecord = workRecordMapper.selectOne(recordQueryWrapper);
         WorkRecord workRecord;
-        if (existRecord != null) {
-            // 更新提交记录
-            workRecord = existRecord;
+        
+        if (existingRecord != null) {
+            // 更新已有记录
+            workRecord = existingRecord;
             workRecord.setSubmitContent(workSubmitDTO.getContent());
-            workRecord.setSubmitDate(LocalDateTime.now());
             workRecord.setStatus(RECORD_STATUS_SUBMITTED);
+            workRecord.setSubmitDate(LocalDateTime.now());
             workRecord.setChangeDate(LocalDateTime.now());
+            workRecord.setTeachplanId(workSubmitDTO.getTeachplanId());
             workRecordMapper.updateById(workRecord);
         } else {
-            // 创建新的提交记录
+            // 创建新记录
             workRecord = new WorkRecord();
             workRecord.setWorkId(workSubmitDTO.getWorkId());
-            workRecord.setUserId(userId);
+            workRecord.setTeachplanId(workSubmitDTO.getTeachplanId());
             workRecord.setSubmitContent(workSubmitDTO.getContent());
+            workRecord.setUserId(1L); // TODO: 替换为实际的学生ID获取逻辑
             workRecord.setStatus(RECORD_STATUS_SUBMITTED);
             workRecord.setSubmitDate(LocalDateTime.now());
             workRecord.setCreateDate(LocalDateTime.now());
             workRecord.setChangeDate(LocalDateTime.now());
             workRecordMapper.insert(workRecord);
         }
-
+        
         return workRecord;
     }
 
@@ -409,5 +428,29 @@ public class WorkServiceImpl implements WorkService {
         result.setRecGroupDTOList(groups);
 
         return result;
+    }
+
+    @Override
+    public WorkRecord getWorkRecordById(Long workId) {
+        // TODO: 获取当前登录用户ID，这里暂时用固定值1L代替
+        Long userId = 1L;
+        
+        // 根据workId和userId查询作业提交记录
+        LambdaQueryWrapper<WorkRecord> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(WorkRecord::getWorkId, workId)
+                .eq(WorkRecord::getUserId, userId);
+        
+        return workRecordMapper.selectOne(queryWrapper);
+    }
+
+    @Override
+    public WorkGrade getWorkGradeByRecordId(Long recordId) {
+        // 查询作业记录关联的评分信息
+        LambdaQueryWrapper<WorkGrade> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(WorkGrade::getWorkRecordId, recordId)
+                .orderByDesc(WorkGrade::getCreateDate)
+                .last("LIMIT 1"); // 获取最新的评分记录
+        
+        return workGradeMapper.selectOne(queryWrapper);
     }
 }

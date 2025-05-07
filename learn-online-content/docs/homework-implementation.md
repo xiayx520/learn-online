@@ -8,7 +8,6 @@ create table work_info (
     id bigint auto_increment comment '主键' primary key,
     title varchar(255) not null comment '作业标题',
     description text comment '作业描述',
-    bind_courses text comment '绑定课程，JSON数组格式',
     user_num int default 0 comment '答题人数',
     status varchar(10) default 'draft' comment '作业状态：draft-草稿，published-已发布，archived-已归档',
     create_user bigint comment '创建人',

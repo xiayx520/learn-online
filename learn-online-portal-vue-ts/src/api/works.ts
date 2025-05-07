@@ -1,6 +1,6 @@
 import { createAPI } from '@/utils/request'
 import { IWorkPageList, IWorkDTO, IWorkVO } from '@/entity/work-page-list'
-import { PageParams, QueryWorkParamsDto } from '@/entity/page-params'
+import { PageParams, QueryWorkParamsDto, QueryWorkRecordParamsDto } from '@/entity/page-params'
 
 export const defaultWork: IWorkVO = {
   title: '',
@@ -27,17 +27,16 @@ export async function addWork(data: IWorkVO): Promise<IWorkDTO> {
 
 /**
  * 分页条件查询作业列表
- * @param params 查询参数
+ * @param pageParams 分页参数
+ * @param queryParams 查询参数
  */
-export async function getWorkPageList(
-  params: PageParams & QueryWorkParamsDto
-): Promise<IWorkPageList> {
-  const { data: responseData } = await createAPI('/content/work/list', 'post', null, params)
+export async function getWorkPageList(pageParams: PageParams, queryParams: QueryWorkParamsDto): Promise<IWorkPageList> {
+  const { data } = await createAPI('/content/work/list', 'post', pageParams, queryParams)
   return {
-    records: responseData.items || [],
-    total: parseInt(responseData.counts) || 0,
-    pageNo: parseInt(responseData.page) || 1,
-    pageSize: parseInt(responseData.pageSize) || 10
+    records: data.items || [],
+    total: parseInt(data.counts) || 0,
+    pageNo: parseInt(data.page) || 1,
+    pageSize: parseInt(data.pageSize) || 10
   }
 }
 
@@ -79,10 +78,11 @@ export async function submitWork(data: any): Promise<any> {
 
 /**
  * 查询作业提交记录
- * @param params 查询参数
+ * @param pageParams 分页参数
+ * @param queryParams 查询参数
  */
-export async function getWorkRecordList(params: any): Promise<any> {
-  const { data } = await createAPI('/content/work/record/list', 'post', null, params)
+export async function getWorkRecordList(pageParams: PageParams, queryParams: QueryWorkRecordParamsDto): Promise<any> {
+  const { data } = await createAPI('/content/work/record/list', 'post', pageParams, queryParams)
   return data
 }
 

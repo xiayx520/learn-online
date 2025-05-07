@@ -61,11 +61,10 @@
               <el-button type="text" size="mini" @click="handlePublish(scope.row.id)">发布</el-button>
               <el-button type="text" size="mini" @click="handleOpenDeleteWorkConfirm(scope.row.id)">移除</el-button>
             </template>
-            <!-- 发布状态：可下线、归档、查看提交记录 -->
+            <!-- 发布状态：可下线、归档 -->
             <template v-else-if="scope.row.status === 'published'">
               <el-button type="text" size="mini" @click="handleUnpublish(scope.row.id)">下线</el-button>
               <el-button type="text" size="mini" @click="handleArchive(scope.row.id)">归档</el-button>
-              <el-button type="text" size="mini" @click="handleViewRecords(scope.row.id)">查看提交记录</el-button>
             </template>
             <!-- 归档状态：可取消归档 -->
             <template v-else-if="scope.row.status === 'archived'">
@@ -112,7 +111,6 @@ import WorkAddDialog from './components/work-add-dialog.vue'
 import BindTeachplanDialog from './components/bind-teachplan-dialog.vue'
 import { IWorkPageList, IWorkDTO, IWorkVO } from '@/entity/work-page-list'
 import { getWorkPageList, deleteWork, defaultWork, publishWork, archiveWork, unpublishWork, unarchiveWork } from '@/api/works'
-import { getCourseList } from '@/api/courses'
 
 @Component({
   components: {
@@ -168,7 +166,6 @@ export default class WorkList extends Vue {
   private total: number = 0
   private bindTeachplanDialogVisible = false
   private currentWorkId: number | null = null
-  private courseList: any[] = []
 
   created() {
     this.getList()
@@ -180,24 +177,20 @@ export default class WorkList extends Vue {
   private async getList() {
     try {
       this.loading = true
-      console.log('开始获取作业列表，参数：', this.queryParams)
-      const result = await getWorkPageList(this.queryParams)
-      console.log('获取作业列表结果：', result)
-      console.log('返回数据类型：', typeof result)
-      console.log('是否包含 records：', 'records' in result)
-      console.log('是否包含 total：', 'total' in result)
-      console.log('records 类型：', Array.isArray(result.records) ? 'array' : typeof result.records)
-      
-      if (!result.records) {
-        console.warn('返回数据中没有 records 字段')
-        this.list = []
-        this.total = 0
-        return
+      // 构造分页参数
+      const pageParams = {
+        pageNo: this.queryParams.pageNo,
+        pageSize: this.queryParams.pageSize
       }
-      
+      // 构造查询参数
+      const queryParams = {
+        status: this.queryParams.status || undefined
+      }
+      const result = await getWorkPageList(pageParams, queryParams)
       this.list = result.records
-      this.total = result.total || 0
-      console.log('设置到组件的数据：', this.list)
+      this.total = result.total
+      this.queryParams.pageNo = result.pageNo
+      this.queryParams.pageSize = result.pageSize
     } catch (error) {
       console.error('获取作业列表失败:', error)
       this.$message.error('获取作业列表失败')
@@ -270,16 +263,6 @@ export default class WorkList extends Vue {
         this.$message.error('归档失败，请重试')
       }
     }
-  }
-
-  /**
-   * 查看提交记录
-   */
-  private handleViewRecords(workId: number) {
-    this.$router.push({
-      path: '/organization/work-record-manage/work-record-list',
-      query: { workId: workId.toString() }
-    })
   }
 
   /**
@@ -422,24 +405,6 @@ export default class WorkList extends Vue {
   private handleBindTeachplan(workId: number) {
     this.currentWorkId = workId
     this.bindTeachplanDialogVisible = true
-  }
-
-  // 加载课程列表
-  private async loadCourseList() {
-    try {
-      const pageParams = {
-        pageNo: 1,
-        pageSize: 100
-      }
-      // 只传递查询条件作为请求体
-      const queryCourseParamsDto = {
-        publishStatus: '203002' // 已发布状态
-      }
-      const result = await getCourseList(pageParams, queryCourseParamsDto)
-      this.courseList = result.items || []
-    } catch (error) {
-      this.$message.error('获取课程列表失败')
-    }
   }
 }
 </script>

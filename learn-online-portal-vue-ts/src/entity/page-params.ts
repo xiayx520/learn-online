@@ -21,3 +21,11 @@ export interface QueryWorkParamsDto {
    */
   status?: string
 }
+
+/**
+ * 作业提交记录查询参数
+ */
+export interface QueryWorkRecordParamsDto {
+  workId: number
+  status?: number | null
+}

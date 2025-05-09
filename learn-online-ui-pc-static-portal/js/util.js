@@ -158,3 +158,50 @@ function uuid() {
 function showlogin(){
     window.location = "http://www.51xuecheng.cn/sign.html?returnUrl="+ Base64.encode(window.location)
 }
+
+// 添加HTTP请求工具函数
+function requestGet(url, params) {
+    // 获取JWT令牌
+    var jwt = getJwt();
+    // 创建axios实例
+    return axios.get(url, {
+        params: params,
+        headers: {
+            'Authorization': jwt ? 'Bearer ' + jwt : ''
+        }
+    }).then(response => {
+        // 处理响应数据
+        if (response.data && response.data.code === 0) {
+            return response.data.data;
+        } else {
+            console.error("请求失败:", response.data.message || '未知错误');
+            return Promise.reject(response.data);
+        }
+    }).catch(error => {
+        console.error("请求异常:", error);
+        return Promise.reject(error);
+    });
+}
+
+function requestPost(url, data) {
+    // 获取JWT令牌
+    var jwt = getJwt();
+    // 创建axios实例
+    return axios.post(url, data, {
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': jwt ? 'Bearer ' + jwt : ''
+        }
+    }).then(response => {
+        // 处理响应数据
+        if (response.data && response.data.code === 0) {
+            return response.data.data;
+        } else {
+            console.error("请求失败:", response.data.message || '未知错误');
+            return Promise.reject(response.data);
+        }
+    }).catch(error => {
+        console.error("请求异常:", error);
+        return Promise.reject(error);
+    });
+}

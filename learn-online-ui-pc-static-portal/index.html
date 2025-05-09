@@ -5,10 +5,13 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
-    <meta name="description" content="">
+    <meta name="description" content="员工培训与学习平台">
     <meta name="author" content="">
-    <link rel="icon" href="/img/asset-favicon.ico">
-    <title>在线教育网</title>
+    <link rel="icon" href="/static/img/asset-favicon.ico">
+    <title>员工培训与学习平台</title>
+    <script src="/static/lib/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/lib/bootstrap/js/bootstrap.min.js"></script>
+    <link href="/static/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
 
     <link rel="stylesheet" href="/plugins/normalize-css/normalize.css" />
     <link rel="stylesheet" href="/plugins/bootstrap/dist/css/bootstrap.css" />
@@ -53,8 +56,6 @@
             vertical-align: middle;
             /*width: 355px;*/
             vertical-align: top;
-            *vertical-align: top;
-            _vertical-align: top
         }
 
         .mod-nav__link-nav-third {
@@ -135,7 +136,7 @@
             font-size: 16px;
             display: block;
             color: black;
-            #background-color: #00a4ff;
+            background-color: #00a4ff;
             border: solid 1px #00a4ff;
             margin: 0px;
             padding: 0px;
@@ -168,26 +169,49 @@
     <!--#include virtual="/include/header.html"-->
     <!--页面头部结束-->
     <!--banner区-->
-    <!--<div class="travel-index-imgroll">-->
-    <!--<div id="carousel-example-generic" class="carousel slide" data-ride="carousel">-->
-    <!--<ol class="carousel-indicators">-->
-    <!--<li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li>-->
-    <!--<li data-target="#carousel-example-generic" data-slide-to="1"></li>-->
-    <!--<li data-target="#carousel-example-generic" data-slide-to="2"></li>-->
-    <!--</ol>-->
-    <!--<div class="carousel-inner" role="listbox">-->
-    <!--<div class="item active">-->
-    <!--<img src="banner3.png" width="100%" alt="AA"> -->
-    <!--</div>-->
-    <!--<div class="item">-->
-    <!--<img src="bannerA.jpg" width="100%" alt="AA">-->
-    <!--</div>-->
-    <!--<div class="item">-->
-    <!--<img src="bannerB.jpg" width="100%" alt=""> -->
-    <!--</div>-->
-    <!--</div>-->
-    <!--</div>-->
-    <!--</div>-->
+    <div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
+        <!-- Indicators -->
+        <ol class="carousel-indicators">
+            <li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li>
+            <li data-target="#carousel-example-generic" data-slide-to="1"></li>
+            <li data-target="#carousel-example-generic" data-slide-to="2"></li>
+        </ol>
+
+        <!-- Wrapper for slides -->
+        <div class="carousel-inner" role="listbox">
+            <div class="item active">
+                <img src="/static/img/banner1.jpg" alt="企业培训">
+                <div class="carousel-caption">
+                    <h3>企业员工技能提升</h3>
+                    <p>为企业提供全方位的员工培训解决方案</p>
+                </div>
+            </div>
+            <div class="item">
+                <img src="/static/img/banner2.jpg" alt="在线学习">
+                <div class="carousel-caption">
+                    <h3>随时随地在线学习</h3>
+                    <p>灵活的学习时间，丰富的课程资源</p>
+                </div>
+            </div>
+            <div class="item">
+                <img src="/static/img/banner3.jpg" alt="专业课程">
+                <div class="carousel-caption">
+                    <h3>专业的培训课程</h3>
+                    <p>由行业专家打造的高质量培训内容</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <a class="left carousel-control" href="#carousel-example-generic" role="button" data-slide="prev">
+            <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+            <span class="sr-only">Previous</span>
+        </a>
+        <a class="right carousel-control" href="#carousel-example-generic" role="button" data-slide="next">
+            <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+            <span class="sr-only">Next</span>
+        </a>
+    </div>
     <!--轮播图-->
     <!--#include virtual="/include/index_banner.html"-->
     <!--轮播图结束-->
@@ -213,31 +237,29 @@
                 <a href="#">全部课程</a>
             </div>
         </div>-->
-        <div class="my-class-box">
-            <div class="m-slideTop-personFunc">
-                <div class="m-slideTop-personFunc-f">
-                    <div class="u-person-container">
-                        <div class="u-person-title"><span>wwww学习IT精品课程<br>成就高薪就业</span></div>
-                        <div class="title">我的课程表</div>
-                        <div class="courselist">
-                            <a href="#">
-                            <p>>程序语言设计</p>
-                            </a>
-                        </div>
-                        <div class="courselist">
-                            <a href="#"><p>>程序语言设计</p></a>
-                        </div>
-                        <div class="courselist">
-                            <a href="#"><p>>程序语言设计</p></a>
-                        </div>
-                        <div class="navLoginBtn u-person-login" >
-                            <a href="#"> <span class="m-index-person-loginBtn">我的课程</span></a>
-                        </div>
-                        <!--<div class="u-person-word"><span>黑马程序员出品</span></div>-->
-                    </div>
-                </div>
-            </div>
-        </div>
+<!--        <div class="my-class-box">-->
+<!--            <div class="m-slideTop-personFunc">-->
+<!--                <div class="m-slideTop-personFunc-f">-->
+<!--                    <div class="u-person-container">-->
+<!--                        <div class="u-person-title"><span>wwww学习IT精品课程<br>成就高薪就业</span></div>-->
+<!--                        <div class="title">我的课程表</div>-->
+<!--                        <div class="courselist">-->
+<!--                            <a href="http://www.51xuecheng.cn/course/search.html"><p>>程序语言设计</p></a>-->
+<!--                        </div>-->
+<!--                        <div class="courselist">-->
+<!--                            <a href="http://www.51xuecheng.cn/course/search.html"><p>>程序语言设计</p></a>-->
+<!--                        </div>-->
+<!--                        <div class="courselist">-->
+<!--                            <a href="http://www.51xuecheng.cn/course/search.html"><p>>程序语言设计</p></a>-->
+<!--                        </div>-->
+<!--                        <div class="navLoginBtn u-person-login" >-->
+<!--                            <a href="http://ucenter.51xuecheng.cn/"> <span class="m-index-person-loginBtn">我的课程</span></a>-->
+<!--                        </div>-->
+<!--                        &lt;!&ndash;<div class="u-person-word"><span>黑马程序员出品</span></div>&ndash;&gt;-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
         <!--未登录显示学习引导-->
        <!-- <div class="my-class-box">
             <div class="m-slideTop-personFunc">
@@ -270,37 +292,37 @@
         </div>
         <div class="conten-list">
             <div class="Recommend">
-                <div class="title">精品推荐<a href="#" class="queryall">查看全部</a></div>
+                <div class="title">精品推荐<a href="http://www.51xuecheng.cn/course/search.html" class="queryall">查看全部</a></div>
                 <div class="content">
                     <div class="recom-item">
-                        <a href="#">
+                        <a href="http://www.51xuecheng.cn/course/search.html">
                             <p><img src="img/widget-demo1.png" width="100%" alt=""><span class="lab">HOT</span></p>
                             <ul>
-                                <li><a href="/course/course_template.html" target="_blank">Think PHP 5.0 博客系统实战项目演练</a></li>
+                                <li><a href="http://www.51xuecheng.cn/course/search.html" target="_blank">Think PHP 5.0 博客系统实战项目演练</a></li>
                                 <li><span>高级</span> <em> · </em> 1125人在学习</li>
                             </ul>
                         </a>
                     </div>
                     <div class="recom-item">
-                        <a href="#">
+                        <a href="http://www.51xuecheng.cn/course/search.html">
                             <p><img src="img/widget-demo2.png" width="100%" alt=""><span class="lab">HOT</span></p>
                             <ul>
-                                <li>Think PHP 5.0 博客系统实战项目演练 </li>
+                                <li><a href="http://www.51xuecheng.cn/course/search.html" target="_blank">Think PHP 5.0 博客系统实战项目演练</a></li>
                                 <li><span>高级</span> <em> · </em> 1125人在学习</li>
                             </ul>
                         </a>
                     </div>
                     <div class="recom-item">
-                        <a href="#">
+                        <a href="http://www.51xuecheng.cn/course/search.html">
                             <p><img src="img/widget-demo3.png" width="100%" alt=""><span class="lab">HOT</span></p>
                             <ul>
-                                <li>Think PHP 5.0 博客系统实战项目演练 </li>
+                                <li><a href="http://www.51xuecheng.cn/course/search.html" target="_blank">Think PHP 5.0 博客系统实战项目演练</a></li>
                                 <li><span>高级</span> <em> · </em> 1125人在学习</li>
                             </ul>
                         </a>
                     </div>
                     <div class="recom-item">
-                        <a href="#">
+                        <a href="http://www.51xuecheng.cn/course/search.html">
                             <p><img src="img/widget-demo4.png" width="100%" alt=""><span class="lab">HOT</span></p>
                             <ul>
                                 <li>Think PHP 5.0 博客系统实战项目演练 </li>
@@ -339,37 +361,37 @@
                     <div class="cont-right">
                         <div><img src="img/widget-ind-top.png" width="100%" alt=""></div>
                         <div class="recom-item">
-                            <a href="#">
+                            <a href="http://www.51xuecheng.cn/course/search.html">
                                 <p><img src="img/widget-demo4.png" width="100%" alt=""></p>
                                 <ul>
-                                    <li>Think PHP 5.0 博客系统实战项目演练 </li>
+                                    <li><a href="http://www.51xuecheng.cn/course/search.html" target="_blank">Think PHP 5.0 博客系统实战项目演练</a></li>
                                     <li><span>高级</span> <em> · </em> 1125人在学习</li>
                                 </ul>
                             </a>
                         </div>
                         <div class="recom-item">
-                            <a href="#">
+                            <a href="http://www.51xuecheng.cn/course/search.html">
                                 <p><img src="img/widget-demo4.png" width="100%" alt=""></p>
                                 <ul>
-                                    <li>Think PHP 5.0 博客系统实战项目演练 </li>
+                                    <li><a href="http://www.51xuecheng.cn/course/search.html" target="_blank">Think PHP 5.0 博客系统实战项目演练</a></li>
                                     <li><span>高级</span> <em> · </em> 1125人在学习</li>
                                 </ul>
                             </a>
                         </div>
                         <div class="recom-item">
-                            <a href="#">
+                            <a href="http://www.51xuecheng.cn/course/search.html">
                                 <p><img src="img/widget-demo4.png" width="100%" alt=""></p>
                                 <ul>
-                                    <li>Think PHP 5.0 博客系统实战项目演练 </li>
+                                    <li><a href="http://www.51xuecheng.cn/course/search.html" target="_blank">Think PHP 5.0 博客系统实战项目演练</a></li>
                                     <li><span>高级</span> <em> · </em> 1125人在学习</li>
                                 </ul>
                             </a>
                         </div>
                         <div class="recom-item">
-                            <a href="#">
+                            <a href="http://www.51xuecheng.cn/course/search.html">
                                 <p><img src="img/widget-demo4.png" width="100%" alt=""></p>
                                 <ul>
-                                    <li>Think PHP 5.0 博客系统实战项目演练 </li>
+                                    <li><a href="http://www.51xuecheng.cn/course/search.html" target="_blank">Think PHP 5.0 博客系统实战项目演练</a></li>
                                     <li><span>高级</span> <em> · </em> 1125人在学习</li>
                                 </ul>
                             </a>
@@ -383,11 +405,11 @@
                     PHP工程师
                     <div class="course-nav">
                         <!--<span class="active">热门</span>-->
-                        <span><a href="#">基础课程</a></span>
-                        <span><a href="#">就业课程</a></span>
-                        <span><a href="#">高级课程</a></span>
+                        <span><a href="http://www.51xuecheng.cn/course/search.html?keywords=PHP基础">基础课程</a></span>
+                        <span><a href="http://www.51xuecheng.cn/course/search.html?keywords=PHP就业">就业课程</a></span>
+                        <span><a href="http://www.51xuecheng.cn/course/search.html?keywords=PHP高级">高级课程</a></span>
                     </div>
-                    <a class="queryall" href="#">查看全部</a>
+                    <a class="queryall" href="http://www.51xuecheng.cn/course/search.html?keywords=PHP">查看全部</a>
                 </div>
                 <div class="content">
                     <div class="cont-left">
@@ -396,37 +418,37 @@
                     <div class="cont-right">
                         <div><img src="img/widget-ind-top1.png" width="100%" alt=""></div>
                         <div class="recom-item">
-                            <a href="#">
+                            <a href="http://www.51xuecheng.cn/course/search.html">
                                 <p><img src="img/widget-demo4.png" width="100%" alt=""></p>
                                 <ul>
-                                    <li>Think PHP 5.0 博客系统实战项目演练 </li>
+                                    <li><a href="http://www.51xuecheng.cn/course/search.html" target="_blank">Think PHP 5.0 博客系统实战项目演练</a></li>
                                     <li><span>高级</span> <em> · </em> 1125人在学习</li>
                                 </ul>
                             </a>
                         </div>
                         <div class="recom-item">
-                            <a href="#">
+                            <a href="http://www.51xuecheng.cn/course/search.html">
                                 <p><img src="img/widget-demo4.png" width="100%" alt=""></p>
                                 <ul>
-                                    <li>Think PHP 5.0 博客系统实战项目演练 </li>
+                                    <li><a href="http://www.51xuecheng.cn/course/search.html" target="_blank">Think PHP 5.0 博客系统实战项目演练</a></li>
                                     <li><span>高级</span> <em> · </em> 1125人在学习</li>
                                 </ul>
                             </a>
                         </div>
                         <div class="recom-item">
-                            <a href="#">
+                            <a href="http://www.51xuecheng.cn/course/search.html">
                                 <p><img src="img/widget-demo4.png" width="100%" alt=""></p>
                                 <ul>
-                                    <li>Think PHP 5.0 博客系统实战项目演练 </li>
+                                    <li><a href="http://www.51xuecheng.cn/course/search.html" target="_blank">Think PHP 5.0 博客系统实战项目演练</a></li>
                                     <li><span>高级</span> <em> · </em> 1125人在学习</li>
                                 </ul>
                             </a>
                         </div>
                         <div class="recom-item">
-                            <a href="#">
+                            <a href="http://www.51xuecheng.cn/course/search.html">
                                 <p><img src="img/widget-demo4.png" width="100%" alt=""></p>
                                 <ul>
-                                    <li>Think PHP 5.0 博客系统实战项目演练 </li>
+                                    <li><a href="http://www.51xuecheng.cn/course/search.html" target="_blank">Think PHP 5.0 博客系统实战项目演练</a></li>
                                     <li><span>高级</span> <em> · </em> 1125人在学习</li>
                                 </ul>
                             </a>

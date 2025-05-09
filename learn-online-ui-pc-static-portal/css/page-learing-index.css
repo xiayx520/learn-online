@@ -310,8 +310,6 @@ footer dd {
 .travel-index-nav .citylistbox .listbox .box {
   display: none;
   height: 410px !important;
-  _height: 410px;
-  *height: 410px;
   width: 410px;
   position: absolute;
   margin-left: 186px;
@@ -1431,4 +1429,139 @@ em, i {
   color: #fff;
   background: #00a4ff;
   border: solid 1px #00a4ff;
+}
+
+.box-dl {
+    float: left;
+    width: 25%;
+    padding: 0 15px;
+}
+
+.box-dl dt {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.box-dl dd {
+    margin-bottom: 10px;
+}
+
+.box-dl dd a {
+    color: #666;
+    text-decoration: none;
+}
+
+.box-dl dd a:hover {
+    color: #00a4ff;
+}
+
+.footer-link {
+    clear: both;
+    text-align: center;
+    padding: 20px 0;
+    border-top: 1px solid #eee;
+    margin-top: 20px;
+    color: #666;
+}
+
+.carousel-caption {
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 5px;
+    padding: 20px;
+    bottom: 50px;
+}
+
+.carousel-caption h3 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+}
+
+.carousel-caption p {
+    font-size: 16px;
+    color: #eee;
+}
+
+.course-section {
+    padding: 40px 0;
+}
+
+.course-section h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+    border-left: 4px solid #00a4ff;
+    padding-left: 10px;
+}
+
+.nav > ul > li > .dropdown > a {
+  color:#333;
+  font-size:16px;
+  text-decoration:none;
+}
+
+.nav > ul > li > .dropdown > a::before, .nav > ul > li > .dropdown > a::after {
+  content: "";
+  display: inline-block;
+  position: absolute;
+  width: 8px;
+  height: 2px;
+  background-color: #333;
+  transition: all 0.3s;
+}
+
+.course-item {
+    border: 1px solid #eee;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    transition: all 0.3s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.course-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.course-info {
+    padding: 15px;
+}
+
+.course-info h3 {
+    font-size: 18px;
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.course-info p {
+    color: #666;
+    margin-bottom: 15px;
+    height: 40px;
+}
+
+.course-info .btn {
+    background-color: #00a4ff;
+    border-color: #00a4ff;
+}
+
+.course-info .btn:hover {
+    background-color: #0088cc;
+    border-color: #0088cc;
+}
+
+.logo-text {
+  font-size: 24px;
+  font-weight: bold;
+  color: #00a4ff;
+  text-decoration: none;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.logo-text:hover {
+  color: #0088cc;
 }

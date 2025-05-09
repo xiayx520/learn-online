@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xia.learning.mapper.XcLearnRecordMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xia.learning.model.po.XcLearnRecord">
+        <id column="id" property="id" />
+        <result column="course_id" property="courseId" />
+        <result column="course_name" property="courseName" />
+        <result column="user_id" property="userId" />
+        <result column="learn_date" property="learnDate" />
+        <result column="learn_length" property="learnLength" />
+        <result column="teachplan_id" property="teachplanId" />
+        <result column="teachplan_name" property="teachplanName" />
+    </resultMap>
+    
+    <!-- 学习统计结果映射 -->
+    <resultMap id="LearnStatisticsMap" type="com.xia.learning.model.vo.LearnStatisticsVO">
+        <result column="course_id" property="courseId" />
+        <result column="course_name" property="courseName" />
+        <result column="total_learn_length" property="totalLearnLength" />
+        <result column="total_chapters" property="totalChapters" />
+        <result column="completed_chapters" property="completedChapters" />
+        <result column="completion_rate" property="completionRate" />
+    </resultMap>
+    
+    <!-- 排行榜结果映射 -->
+    <resultMap id="LearnRankItemMap" type="com.xia.learning.model.vo.LearnRankItemVO">
+        <result column="user_id" property="userId" />
+        <result column="user_name" property="userName" />
+        <result column="value" property="value" />
+    </resultMap>
+
+    <!-- 查询用户课程学习统计 -->
+    <select id="selectLearnStatistics" resultMap="LearnStatisticsMap">
+        SELECT 
+            r.course_id,
+            r.course_name,
+            SUM(r.learn_length) AS total_learn_length,
+            (SELECT COUNT(DISTINCT teachplan_id) FROM xc_learn_record WHERE course_id = #{courseId}) AS total_chapters,
+            COUNT(DISTINCT r.teachplan_id) AS completed_chapters,
+            IFNULL(COUNT(DISTINCT r.teachplan_id) / 
+                  (SELECT COUNT(DISTINCT teachplan_id) FROM xc_learn_record WHERE course_id = #{courseId}) * 100, 0) AS completion_rate
+        FROM 
+            xc_learn_record r
+        WHERE 
+            r.user_id = #{userId}
+            AND r.course_id = #{courseId}
+        GROUP BY 
+            r.course_id, r.course_name
+    </select>
+    
+    <!-- 查询用户总学习时长 -->
+    <select id="selectTotalLearnLength" resultType="java.lang.Long">
+        SELECT 
+            IFNULL(SUM(learn_length), 0) 
+        FROM 
+            xc_learn_record
+        WHERE 
+            user_id = #{userId}
+    </select>
+    
+    <!-- 查询用户已完成章节数 -->
+    <select id="selectCompletedChapters" resultType="java.lang.Integer">
+        SELECT 
+            COUNT(DISTINCT teachplan_id)
+        FROM 
+            xc_learn_record
+        WHERE 
+            user_id = #{userId}
+            AND course_id = #{courseId}
+    </select>
+    
+    <!-- 查询学习时长排行榜 -->
+    <select id="selectLearnLengthRanking" resultMap="LearnRankItemMap">
+        SELECT
+            r.user_id,
+            r.user_id AS user_name,
+            IFNULL(SUM(r.learn_length), 0) AS value
+        FROM
+            xc_learn_record r
+        WHERE
+            1=1
+            <if test="courseId != null">
+                AND r.course_id = #{courseId}
+            </if>
+        GROUP BY
+            r.user_id
+        ORDER BY
+            value DESC
+        LIMIT 10
+    </select>
+    
+    <!-- 查询完成率排行榜 -->
+    <select id="selectCompletionRateRanking" resultMap="LearnRankItemMap">
+        SELECT 
+            u.user_id,
+            u.user_id AS user_name,
+            IFNULL(
+                (
+                    SELECT COUNT(DISTINCT r.teachplan_id) 
+                    FROM xc_learn_record r 
+                    WHERE r.user_id = u.user_id 
+                    <if test="courseId != null">
+                        AND r.course_id = #{courseId}
+                    </if>
+                ) / 
+                CASE
+                    <if test="courseId != null">
+                        WHEN (SELECT COUNT(DISTINCT teachplan_id) FROM xc_learn_record WHERE course_id = #{courseId}) > 0
+                        THEN (SELECT COUNT(DISTINCT teachplan_id) FROM xc_learn_record WHERE course_id = #{courseId})
+                    </if>
+                    <if test="courseId == null">
+                        WHEN (SELECT COUNT(DISTINCT teachplan_id) FROM xc_learn_record) > 0
+                        THEN (SELECT COUNT(DISTINCT teachplan_id) FROM xc_learn_record)
+                    </if>
+                    ELSE 1
+                END * 100,
+                0
+            ) AS value
+        FROM 
+            (SELECT DISTINCT user_id FROM xc_learn_record 
+            <if test="courseId != null">
+                WHERE course_id = #{courseId}
+            </if>
+            ) u
+        ORDER BY 
+            value DESC
+        LIMIT 10
+    </select>
+
+</mapper> 

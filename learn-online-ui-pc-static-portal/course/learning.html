@@ -1007,6 +1007,55 @@
 				    var fun = new function(){
                     player.addListener('time', timeHandler); //监听播放时间
 				    player.addListener('duration', durationHandler); //监听播放时间
+                    
+                    // 添加学习记录相关事件监听
+                    player.addListener('play', function() {
+                        // 播放开始
+                        learnStartTime = new Date();
+                        // 启动定时记录
+                        startRecordTimer();
+                        console.log("视频开始播放，开始记录学习时间");
+                    });
+                    
+                    player.addListener('pause', function() {
+                        // 播放暂停
+                        if(learnStartTime) {
+                            // 计算本次学习时长
+                            const now = new Date();
+                            const learnTime = Math.floor((now - learnStartTime) / 1000);
+                            learnTotalTime += learnTime;
+                            learnStartTime = null;
+                            
+                            // 记录学习进度
+                            if(learnTime > 0) {
+                                saveLearnProgress(learnTime);
+                            }
+                            
+                            // 停止定时记录
+                            stopRecordTimer();
+                            console.log("视频暂停，记录学习时间：" + learnTime + "秒");
+                        }
+                    });
+                    
+                    player.addListener('ended', function() {
+                        // 播放结束
+                        if(learnStartTime) {
+                            // 计算本次学习时长
+                            const now = new Date();
+                            const learnTime = Math.floor((now - learnStartTime) / 1000);
+                            learnTotalTime += learnTime;
+                            learnStartTime = null;
+                            
+                            // 记录学习进度
+                            if(learnTime > 0) {
+                                saveLearnProgress(learnTime);
+                            }
+                            
+                            // 停止定时记录
+                            stopRecordTimer();
+                            console.log("视频播放结束，记录学习时间：" + learnTime + "秒");
+                        }
+                    });
                 }
                 return fun;
 			}
@@ -1068,6 +1117,9 @@
             vdPlay(mediaFile) {
                 
                 if(mediaFile && mediaFile.mediaId){
+                    // 更新当前教学计划ID用于学习记录
+                    this.teachplanId = mediaFile.teachplanId;
+                    
                     //获取视频
                     requestGetMeidaInfo(mediaFile.mediaId,mediaFile.teachplanId,this.courseId).then(res=>{
                         if(res&&res.result){
@@ -1142,5 +1194,109 @@
 
 
  </script>
+ <script>
+    var courseId; // 课程ID
+    var teachplanId; // 章节ID
+    var mediaId; // 媒体ID
+    var learnStartTime; // 学习开始时间
+    var learnTotalTime = 0; // 累计学习时长（秒）
+    var recordIntervalId; // 定时记录ID
+    var recordInterval = 60; // 记录间隔（秒）
+    
+    // 当页面加载完成后初始化
+    window.addEventListener('load', function() {
+        // 初始化学习记录变量
+        courseId = GetQueryString("id");
+        teachplanId = GetQueryString("chapter");
+        mediaId = null; // 将在播放时通过Vue实例获取
+        learnStartTime = null;
+        learnTotalTime = 0;
+        recordIntervalId = null;
+        
+        console.log("学习记录功能初始化完成");
+    });
+    
+    // 开始定时记录
+    function startRecordTimer() {
+        // 清除已有的定时器
+        stopRecordTimer();
+        
+        // 设置新的定时器
+        recordIntervalId = setInterval(function() {
+            if(learnStartTime) {
+                // 计算当前学习时长
+                const now = new Date();
+                const learnTime = Math.floor((now - learnStartTime) / 1000);
+                
+                // 记录学习进度
+                if(learnTime > 0) {
+                    saveLearnProgress(learnTime);
+                    learnTotalTime += learnTime;
+                    learnStartTime = now;
+                    console.log("定时记录学习时间：" + learnTime + "秒");
+                }
+            }
+        }, recordInterval * 1000);
+    }
+    
+    // 停止定时记录
+    function stopRecordTimer() {
+        if(recordIntervalId) {
+            clearInterval(recordIntervalId);
+            recordIntervalId = null;
+        }
+    }
+    
+    // 保存学习进度
+    function saveLearnProgress(learnTime) {
+        // 从Vue实例获取课程ID和章节ID
+        var vue = document.querySelector("#teachplanApp").__vue__;
+        var currentCourseId = vue.courseId;
+        var currentTeachplanId = vue.teachplanId;
+        
+        // 获取当前章节名称
+        var currentTeachplanName = getCurrentChapterName(vue);
+        
+        if(currentCourseId && currentTeachplanId && learnTime > 0) {
+            console.log("记录学习进度: 课程ID=" + currentCourseId + ", 章节ID=" + currentTeachplanId + ", 章节名称=" + currentTeachplanName + ", 学习时长=" + learnTime + "秒");
+            saveLearnRecord(currentCourseId, currentTeachplanId, learnTime, currentTeachplanName)
+                .then(response => {
+                    console.log("学习进度记录成功", response);
+                })
+                .catch(error => {
+                    console.error("学习进度记录失败", error);
+                });
+        } else {
+            console.log("学习进度记录参数不完整", currentCourseId, currentTeachplanId, learnTime);
+        }
+    }
+    
+    // 获取当前章节名称
+    function getCurrentChapterName(vue) {
+        var teachplanId = vue.teachplanId;
+        var teachplans = vue.teachplans;
+        var chapterName = "未知章节";
+        
+        // 遍历章节树查找匹配的章节
+        if(teachplans && teachplanId) {
+            for(let i = 0; i < teachplans.length; i++) {
+                var firstLevel = teachplans[i];
+                var secondLevels = firstLevel.teachPlanTreeNodes;
+                
+                if(secondLevels) {
+                    for(let j = 0; j < secondLevels.length; j++) {
+                        var secondLevel = secondLevels[j];
+                        if(secondLevel.teachplanMedia && secondLevel.teachplanMedia.teachplanId == teachplanId) {
+                            // 返回一级章节名称 + 二级章节名称
+                            return firstLevel.pname + " - " + secondLevel.pname;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return chapterName;
+    }
+</script>
 </body>
 </html>

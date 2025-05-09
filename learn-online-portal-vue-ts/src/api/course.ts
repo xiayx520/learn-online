@@ -12,7 +12,7 @@ interface QueryCourseParamsDto {
 }
 
 /**
- * 获取课程列表
+ * 获取课程列表(POST请求)
  * @param pageParams 分页参数
  * @param queryCourseParamsDto 查询条件
  */
@@ -28,4 +28,11 @@ export async function getCourseList(pageParams: PageParams, queryCourseParamsDto
 export async function getTeachplanTree(courseId: number) {
   const { data } = await createAPI(`/content/teachplan/${courseId}/tree-nodes`, 'get')
   return data
+}
+
+/**
+ * 获取课程详情
+ */
+export function getCourseDetail(courseId: string) {
+  return createAPI(`/content/course/${courseId}`, 'get');
 } 

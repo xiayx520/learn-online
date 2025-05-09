@@ -62,6 +62,16 @@ export default [
       {
         path: 'order-list',
         component: () => import('../pages/order-manage/order-list.vue')
+      },
+      // 学习记录管理
+      {
+        path: 'learning-record',
+        component: () => import('../pages/learning-record/index.vue')
+      },
+      // 学习统计详情
+      {
+        path: 'learning-statistics',
+        component: () => import('../pages/learning-record/statistics.vue')
       }
     ]
   }

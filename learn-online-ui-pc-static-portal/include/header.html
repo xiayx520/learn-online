@@ -11,6 +11,19 @@
     <link rel="stylesheet" href="http://www.51xuecheng.cn/static/css/page-header.css" />
     <link rel="stylesheet" href="http://www.51xuecheng.cn/static/css/el/index.css" />
     <link rel="stylesheet" href="http://www.51xuecheng.cn/static/css/main.css" />
+    <style>
+        .logo-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00a4ff;
+            text-decoration: none;
+            white-space: nowrap;
+            display: inline-block;
+        }
+        .logo-text:hover {
+            color: #0088cc;
+        }
+    </style>
 
     <script src="http://www.51xuecheng.cn/static/js/vue/vue.min.js"></script>
     <script src="http://www.51xuecheng.cn/static/js/jwt-decode/jwt-decode.min.js"></script>
@@ -29,13 +42,12 @@
     <div class="learingHeader">
         <nav class="navbar">
             <div class="">
-                <div class="logo"><img src="http://www.51xuecheng.cn/static/img/asset-logoIco.png" width="100%" alt=""></div>
+                <div class="logo"><a href="javascript:;" class="logo-text">员工培训与学习平台</a></div>
                 <div class="nav-list">
                     <ul class="nav navbar-nav">
-                        <li ><a href="http://www.51xuecheng.cn">首页</a></li>
+                        <li class="active1"><a href="http://www.51xuecheng.cn/index.html">首页</a></li>
                         <li><a href="http://www.51xuecheng.cn/course/search.html">课程</a></li>
-                        <li><a href="#">职业规划</a></li>
-                        <li></li>
+<!--                        <li><a href="http://teacher.51xuecheng.cn/">教学企业</a></li>-->
                     </ul>
                 </div>
 
@@ -48,7 +60,7 @@
                     <a href="javascript:;" @click="logout" v-if="logined == true">退出</a>
 					 <a href="javascript:;" @click="showlogin" v-if="logined == false">登陆&nbsp;|&nbsp;注册</a>
                     <a href="http://ucenter.51xuecheng.cn/" class="personal" target="_blank">我的学习</a>
-                    <a href="http://teacher.51xuecheng.cn/" class="personal" target="_blank">教学机构</a>
+                    <a href="http://teacher.51xuecheng.cn/" class="personal" target="_blank">教学企业</a>
                     <!--<a href="#" class="myInfo"><img src="img/asset-myImg.jpg" alt="">个人中心</a>-->
                 </div>
                 <!--<div class="starch">

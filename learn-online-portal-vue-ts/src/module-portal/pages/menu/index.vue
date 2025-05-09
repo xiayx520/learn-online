@@ -47,19 +47,10 @@
               <router-link to="/organization/course-add?teachmode=200003">添加直播课程</router-link>
             </dd>
             <dd>
-              <router-link to="/organization/live-list">直播管理</router-link>
-            </dd>
-            <dd>
               <router-link to="/organization/media-list">媒资管理</router-link>
             </dd>
             <dd>
               <router-link to="/organization/work-list">作业管理</router-link>
-            </dd>
-            <dd>
-              <router-link to="/organization/course-comment-list">评价管理</router-link>
-            </dd>
-            <dd>
-              <router-link to="/organization/work-record-list">作业批改</router-link>
             </dd>
             <dd>
               <router-link to="/organization/order-list">财务管理</router-link>

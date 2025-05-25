@@ -1,6 +1,6 @@
 <template>
     <div class="portal-index">
-      <h1>学成在线v2 门户页</h1>
+      <h1>员工培训与学习平台 门户页</h1>
       <br />
       <div class="row"> 
         <dl class="col-md-3">

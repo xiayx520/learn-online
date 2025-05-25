@@ -2,13 +2,7 @@
   <div class="nav-bar">
     <el-tabs class="el-tabs" v-model="activeName" type="border-card" @tab-click="handleClick">
       <el-tab-pane label="网站首页" >
-        <a href="http://www.51xuecheng.cn">学成在线首页</a>
-       
-      </el-tab-pane>
-      <el-tab-pane label="机构管理" name="first">
-        <router-link to="/organization/company">机构资料</router-link>
-        <div class="divider"></div>
-        <router-link to="/organization/member">机构成员</router-link>
+        <a href="http://www.51xuecheng.cn">员工培训与学习平台首页</a>
       </el-tab-pane>
       <el-tab-pane label="教务教学" name="second">
         <router-link to="/organization/course-list">课程管理</router-link>
@@ -71,7 +65,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
   name: 'NavBar'
 })
 export default class extends Vue {
-  private activeName: string = 'first'
+  private activeName: string = 'second'
 
   private handleClick(tab: any, event: any) {}
 }

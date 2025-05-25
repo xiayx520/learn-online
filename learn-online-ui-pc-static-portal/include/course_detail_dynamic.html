@@ -256,11 +256,36 @@
                             $('.popup-course').show()
                         }else if(res.learnStatus == '702002'){
                             //需要购买课程
-                            $('.popup-box').show()
+                            //调用添加选课接口获取课程信息
+                            addChoosecourse(this.courseId).then((chooseCourseRes) => {
+                                console.log("选课返回：", chooseCourseRes);
+                                if(chooseCourseRes && chooseCourseRes.learnStatus == '702002'){
+                                    //生成支付二维码
+                                    this.createQRCode(chooseCourseRes)
+                                    //显示弹窗
+                                    $('.popup-box').show()
+                                }else{
+                                    this.$message.error("获取课程信息失败");
+                                }
+                            }).catch(error => {
+                                console.error("选课请求失败:", error);
+                                if(error && error.response && error.response.data && error.response.data.errMessage){
+                                    this.$message.error(error.response.data.errMessage)
+                                }else{
+                                    this.$message.error('获取课程信息失败')
+                                }
+                            })
                         }else{
                             //已过期需要申请续期或重新支付
                             this.$message.success('该课程已过期请进入选课列表申请续期或重新支付');
                         }
+                    }
+                }).catch(error => {
+                    console.error("学习状态请求失败:", error);
+                    if(error && error.response && error.response.data && error.response.data.errMessage){
+                        this.$message.error(error.response.data.errMessage)
+                    }else{
+                        this.$message.error('获取学习状态失败')
                     }
                 })
                 }
@@ -336,66 +361,79 @@
                 let activeUser= getActiveUser();
                 if(activeUser){
                     querypayresult(this.payNo).then((res) => {
-						if(res.status){
-							if(res.status == '601002'){//支付成功
-							   this.$message.success('支付成功，可以去学习啦');
-							}else{
-								this.$message.error('请扫码支付，支付完成请不要重复支付。');
-							}
+                        console.log("支付结果：", res);
+                        if(res && res.status){
+                            if(res.status == '601002'){//支付成功
+                               this.$message.success('支付成功，可以去学习啦');
+                               //关闭支付弹窗
+                               $('.popup-box').hide();
+                               //跳转到学习页面
+                               this.startLearngin();
+                            }else{
+                                this.$message.error('请扫码支付，支付完成请不要重复支付。');
+                            }
+                       }else{
+                           this.$message.error('查询支付结果失败，请稍后重试');
                        }
                     }).catch(error=>{
-                                if(error&&error.response.data.errMessage){
-                                    this.$message.error(error.response.data.errMessage)
-                                }else{
-                                    this.$message.error('出错了')
-                                }
-                               
-                            })
+                        console.error("支付查询失败:", error);
+                        if(error && error.response && error.response.data && error.response.data.errMessage){
+                            this.$message.error(error.response.data.errMessage)
+                        }else{
+                            this.$message.error('查询支付结果失败')
+                        }
+                    })
                 }else{
                     //弹出登录框架
                     showlogin()
                 }
-
             },
             createQRCode(chooseCourse){//生成支付二维码
-                    var addOrderDto={
-                        "totalPrice":chooseCourse.coursePrice,
-                        "orderType":'60201',
-                        "orderName":chooseCourse.courseName,
-                        "orderDescrip":'购买课程:'+chooseCourse.courseName,
-                        "orderDetail":'',
-                        "outBusinessId":chooseCourse.id
-                    }
-                    // addOrderDto.totalPrice = chooseCourse.coursePrice
-                    // addOrderDto.orderType='60201'
-                    // addOrderDto.orderName=chooseCourse.courseName;
-                    // addOrderDto.orderDescrip='购买课程:'+chooseCourse.courseName
-                    // addOrderDto.orderDetail=JSON.stringify(chooseCourse)
-                    // addOrderDto.outBusinessId=chooseCourse.id
-                    var goods={
-                        "goodsId":chooseCourse.courseId,
-                        "goodsType":'60201',
-                        "goodsName":chooseCourse.courseName,
-                        "goodsPrice":chooseCourse.coursePrice
-                    }
-                    var goodsArray=[goods]
-                    addOrderDto.orderDetail=JSON.stringify(goodsArray)
-                    console.log(addOrderDto)
-                    generatepaycode(addOrderDto).then((res) => {
-                        if(res&&res.qrcode){
-							//console.log(res)
-							 this.payNo = res.payNo
-                            this.qrcode=res.qrcode
+                var addOrderDto={
+                    "totalPrice":chooseCourse.coursePrice,
+                    "orderType":'60201',
+                    "orderName":chooseCourse.courseName,
+                    "orderDescrip":'购买课程:'+chooseCourse.courseName,
+                    "orderDetail":'',
+                    "outBusinessId":chooseCourse.id
+                }
+                // addOrderDto.totalPrice = chooseCourse.coursePrice
+                // addOrderDto.orderType='60201'
+                // addOrderDto.orderName=chooseCourse.courseName;
+                // addOrderDto.orderDescrip='购买课程:'+chooseCourse.courseName
+                // addOrderDto.orderDetail=JSON.stringify(chooseCourse)
+                // addOrderDto.outBusinessId=chooseCourse.id
+                var goods={
+                    "goodsId":chooseCourse.courseId,
+                    "goodsType":'60201',
+                    "goodsName":chooseCourse.courseName,
+                    "goodsPrice":chooseCourse.coursePrice
+                }
+                var goodsArray=[goods]
+                addOrderDto.orderDetail=JSON.stringify(goodsArray)
+                console.log(addOrderDto)
+                generatepaycode(addOrderDto).then((res) => {
+                    console.log("支付二维码生成结果：", res);
+                    if(res){
+                        // 直接使用返回的结果
+                        this.payNo = res.payNo;
+                        this.qrcode = res.qrcode;
+                        
+                        // 确保二维码显示在弹窗中
+                        if(!this.qrcode){
+                            this.$message.error('生成二维码失败，请重试');
                         }
-                    }).catch(error=>{
-                                if(error&&error.response.data.errMessage){
-                                    this.$message.error(error.response.data.errMessage)
-                                }else{
-                                    this.$message.error('出错了')
-                                }
-                               
-                            })
-
+                    } else {
+                        this.$message.error('生成支付二维码失败');
+                    }
+                }).catch(error=>{
+                    console.error("生成支付二维码失败:", error);
+                    if(error && error.response && error.response.data && error.response.data.errMessage){
+                        this.$message.error(error.response.data.errMessage)
+                    }else{
+                        this.$message.error('生成支付二维码失败，请重试')
+                    }
+                })
             },
             createOrder(){
                 createOrder(this.courseId).then((res) => {
